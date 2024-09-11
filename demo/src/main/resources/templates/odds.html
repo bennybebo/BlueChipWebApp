@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>NFL Matchups and Odds</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>NFL Matchups & Odds</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Matchup</th>
+                <th>Bookmaker</th>
+                <th>Odds</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="odds : ${oddsList}">
+                <td th:text="${odds.homeTeam} + ' vs ' + ${odds.awayTeam}"></td>
+                <td>
+                    <!-- Iterate through all bookmakers for the current odds -->
+                    <table>
+                        <tr th:each="bookmaker : ${odds.bookmakers}">
+                            <td th:text="${bookmaker.title}"></td>
+                            <td th:each="market : ${bookmaker.markets}">
+                                <p th:each="outcome : ${market.outcomes}">
+                                    <span th:text="${outcome.name} + ': ' + ${outcome.price}"></span>
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
+
+
