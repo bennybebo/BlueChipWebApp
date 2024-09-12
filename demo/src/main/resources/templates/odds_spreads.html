@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Spreads Odds</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 10px; text-align: center; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+    <!-- Insert Navbar Fragment -->
+    <div th:insert="~{navbar :: navbar}"></div>
+
+    <h1>Spreads Odds</h1>
+
+    <!-- Table of Matchups and Spreads Odds -->
+    <table>
+        <thead>
+            <tr>
+                <th>Matchup</th>
+                <!-- Render the header dynamically for each unique bookmaker -->
+                <th th:each="bookmaker : ${uniqueBookmakers}" th:text="${bookmaker.title}"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="odds : ${oddsList}">
+                <!-- Display the matchup (home team vs away team) -->
+                <td th:text="${odds.homeTeam} + ' vs ' + ${odds.awayTeam}"></td>
+                
+                <!-- Iterate through each unique bookmaker -->
+                <td th:each="bookmaker : ${uniqueBookmakers}">
+                    <!-- Check if this bookmaker has odds for the current matchup -->
+                    <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
+                        <!-- If the bookmaker has odds for Spreads, display them -->
+                        <p th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
+                            <span th:if="${market.key == 'spreads'}" th:each="outcome : ${market.outcomes}">
+                                <span th:text="${outcome.name}"></span>: 
+                                <span th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span> 
+                                <!-- Display the point spread if available -->
+                                (Point: <span th:text="${outcome.point != null && outcome.point > 0 ? '+' + outcome.point : outcome.point}"></span>)
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- If no odds are available for the bookmaker -->
+                    <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] == null}">
+                        <p>No odds available</p>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
+

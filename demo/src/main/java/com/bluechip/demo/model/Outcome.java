@@ -2,7 +2,7 @@ package com.bluechip.demo.model;
 
 public class Outcome {
     private String name;
-    private double price;
+    private int price;
     private double point;
 
     // Getters and Setters
@@ -14,11 +14,11 @@ public class Outcome {
         this.name = name;
     }
 
-    public double getPrice() {
+    public int getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(int price) {
         this.price = price;
     }
 

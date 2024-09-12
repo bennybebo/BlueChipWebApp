@@ -68,6 +68,13 @@
 		    <groupId>org.springframework.boot</groupId>
 		    <artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
+		
+		<!-- Bootstrap used to aid in making and styling web pages -->
+		<dependency>
+		    <groupId>org.webjars</groupId>
+		    <artifactId>bootstrap</artifactId>
+		    <version>5.2.1</version>  <!-- Check for the latest version -->
+		</dependency>
 	</dependencies>
 
 	<build>

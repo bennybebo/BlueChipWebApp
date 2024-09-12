@@ -20,6 +20,8 @@
     </style>
 </head>
 <body>
+
+	
     <h1>NFL Matchups & Odds</h1>
 
     <!-- Outer table to list matchups -->
@@ -44,7 +46,22 @@
                             <tr th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
                                 <!-- Get the bookmaker's odds for this matchup -->
                                 <td th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
-                                    <p th:each="outcome : ${market.outcomes}" th:text="${outcome.name} + ': ' + ${outcome.price}"></p>
+                                    
+                                    <!-- For spread markets, display name, price, and point with a '+' for positive values -->
+                                    <p th:if="${market.key == 'spreads'}" th:each="outcome : ${market.outcomes}">
+                                        <span th:text="${outcome.name}"></span>
+                                        <span th:text="': '"></span>
+                                        <span th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
+                                        <span th:text="', Point: '"></span>
+                                        <span th:text="${outcome.point != null && outcome.point > 0 ? '+' + outcome.point : outcome.point}"></span>
+                                    </p>
+
+                                    <!-- For other markets, display name and price with a '+' for positive values -->
+                                    <p th:if="${market.key != 'spreads'}" th:each="outcome : ${market.outcomes}">
+                                        <span th:text="${outcome.name}"></span>
+                                        <span th:text="': '"></span>
+                                        <span th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
+                                    </p>
                                 </td>
                             </tr>
                             <!-- Display empty cell if bookmaker doesn't have odds for this matchup -->
@@ -59,3 +76,5 @@
     </table>
 </body>
 </html>
+
+

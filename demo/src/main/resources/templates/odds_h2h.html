@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>H2H Odds</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Ensure borders collapse */
+        }
+
+        th, td {
+            border: 1px solid black;  /* Ensure a consistent border */
+            padding: 0;               /* Remove padding */
+            margin: 0;                /* Remove margin */
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Custom alternating row colors */
+        tbody tr:nth-child(4n+1),
+        tbody tr:nth-child(4n+2) {
+            background-color: #80dfff; /* First two rows: light blue */
+        }
+
+        tbody tr:nth-child(4n+3),
+        tbody tr:nth-child(4n+4) {
+            background-color: #d1f3ff; /* Next two rows: lighter blue */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Insert Navbar Fragment -->
+    <div th:insert="~{navbar :: navbar}"></div>
+
+    <div class="container">
+        <h1 class="my-4">H2H Odds</h1>
+
+        <!-- Table of Matchups and H2H Odds -->
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th th:each="bookmaker : ${uniqueBookmakers}" th:text="${bookmaker.title}"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Iterate once through the oddsList and generate two rows (home and away team) per iteration -->
+                <th:block th:each="odds : ${oddsList}">
+                    <tr>
+                        <td th:text="${odds.homeTeam}"></td>
+                        <td th:each="bookmaker : ${uniqueBookmakers}">
+                            <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
+                                <p th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
+                                    <span th:if="${market.key == 'h2h'}" th:each="outcome : ${market.outcomes}">
+                                        <span th:if="${outcome.name == odds.homeTeam}" th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
+                                    </span>
+                                </p>
+                            </div>
+                            <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] == null}">
+                                <p>No odds available</p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td th:text="${odds.awayTeam}"></td>
+                        <td th:each="bookmaker : ${uniqueBookmakers}">
+                            <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
+                                <p th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
+                                    <span th:if="${market.key == 'h2h'}" th:each="outcome : ${market.outcomes}">
+                                        <span th:if="${outcome.name == odds.awayTeam}" th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
+                                    </span>
+                                </p>
+                            </div>
+                            <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] == null}">
+                                <p>No odds available</p>
+                            </div>
+                        </td>
+                    </tr>
+                </th:block>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
