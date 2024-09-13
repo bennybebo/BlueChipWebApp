@@ -63,6 +63,9 @@ public class OddsController {
         sportNames.put("americanfootball_nfl", "NFL");
         sportNames.put("basketball_nba", "NBA");
         sportNames.put("americanfootball_ncaaf", "NCAAF");
+        sportNames.put("baseball_mlb", "MLB");
+        sportNames.put("basketball_wnba", "WNBA");
+        sportNames.put("icehockey_nhl", "NHL");
         // Add other sports as needed
         return sportNames.getOrDefault(sportKey, sportKey);
     }
@@ -85,7 +88,22 @@ public class OddsController {
         ncaaf.put("key", "americanfootball_ncaaf");
         ncaaf.put("name", "NCAAF");
         availableSports.add(ncaaf);
+        
+        Map<String, String> mlb = new HashMap<>();
+        mlb.put("key", "baseball_mlb");
+        mlb.put("name", "MLB");
+        availableSports.add(mlb);
 
+        Map<String, String> wnba = new HashMap<>();
+        wnba.put("key", "basketball_wnba");
+        wnba.put("name", "WNBA");
+        availableSports.add(wnba);
+       
+
+        Map<String, String> nhl = new HashMap<>();
+        nhl.put("key", "icehockey_nhl");
+        nhl.put("name", "NHL");
+        availableSports.add(nhl);
         // Add more sports as needed
 
         return availableSports;
