@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Spreads Odds - [[${sportName}]]</title>
+    <title>Totals Odds - [[${sportName}]]</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
@@ -48,13 +48,11 @@
         }
 
         /* Custom alternating row colors */
-        tbody tr:nth-child(4n+1),
-        tbody tr:nth-child(4n+2) {
+        tbody tr:nth-child(2n+1) {
             background-color: #1c2125;
         }
 
-        tbody tr:nth-child(4n+3),
-        tbody tr:nth-child(4n+4) {
+        tbody tr:nth-child(2n) {
             background-color: #272a2e;
         }
 
@@ -92,51 +90,31 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <h1 class="my-4">Spreads Odds - [[${sportName}]]</h1>
+        <h1 class="my-4">Totals Odds - [[${sportName}]]</h1>
 
-        <!-- Table of Matchups and Spreads Odds -->
+        <!-- Table of Matchups and Totals Odds -->
         <div class="table-responsive">
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Team</th>
+                        <th>Matchup</th>
                         <th th:each="bookmaker : ${uniqueBookmakers}" th:text="${bookmaker.title}"></th>
                     </tr>
                 </thead>
                 <tbody>
                     <th:block th:each="odds : ${oddsList}">
-                        <!-- Home Team Row -->
                         <tr>
-                            <td th:text="${odds.homeTeam}"></td>
+                            <!-- Matchup -->
+                            <td th:text="${odds.homeTeam} + ' vs ' + ${odds.awayTeam}"></td>
                             <td th:each="bookmaker : ${uniqueBookmakers}">
                                 <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
                                     <div th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
-                                        <div th:if="${market.key == 'spreads'}">
+                                        <div th:if="${market.key == 'totals'}">
                                             <div th:each="outcome : ${market.outcomes}">
-                                                <div th:if="${outcome.name == odds.homeTeam}">
-                                                    <span th:text="${outcome.point != null && outcome.point > 0 ? '+' + outcome.point : outcome.point}"></span>
-                                                    &nbsp;&nbsp;
-                                                    <span th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] == null}">
-                                    <p>No odds available</p>
-                                </div>
-                            </td>
-                        </tr>
-                        <!-- Away Team Row -->
-                        <tr>
-                            <td th:text="${odds.awayTeam}"></td>
-                            <td th:each="bookmaker : ${uniqueBookmakers}">
-                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
-                                    <div th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
-                                        <div th:if="${market.key == 'spreads'}">
-                                            <div th:each="outcome : ${market.outcomes}">
-                                                <div th:if="${outcome.name == odds.awayTeam}">
-                                                    <span th:text="${outcome.point != null && outcome.point > 0 ? '+' + outcome.point : outcome.point}"></span>
+                                                <div>
+                                                    <span th:text="${outcome.name}"></span>
+                                                    &nbsp;
+                                                    <span th:text="${outcome.point}"></span>
                                                     &nbsp;&nbsp;
                                                     <span th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
                                                 </div>

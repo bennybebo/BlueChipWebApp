@@ -1,91 +1,145 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>H2H Odds</title>
+    <title>H2H Odds - [[${sportName}]]</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    
+
     <style>
+        body {
+            background-color: #1d1f21;
+            color: #c9c9c9;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Main content layout with space for sidebar */
+        .main-content {
+            margin-left: 270px; /* Leave space for the sidebar */
+            padding: 20px;
+            width: calc(100% - 270px);
+        }
+
+        /* Table responsiveness and styling */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
         table {
             width: 100%;
-            border-collapse: collapse; /* Ensure borders collapse */
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+            font-size: 12px; /* Reduced font size */
         }
 
         th, td {
-            border: 1px solid black;  /* Ensure a consistent border */
-            padding: 0;               /* Remove padding */
-            margin: 0;                /* Remove margin */
+            padding: 5px; /* Reduced padding for smaller spacing */
+            margin: 0;
             text-align: center;
+            border: 1px solid #3c3f41;
+            color: #ffffff;
+            white-space: nowrap;
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color: #2a2c2e;
+            font-weight: bold;
         }
 
         /* Custom alternating row colors */
         tbody tr:nth-child(4n+1),
         tbody tr:nth-child(4n+2) {
-            background-color: #80dfff; /* First two rows: light blue */
+            background-color: #1c2125;
         }
 
         tbody tr:nth-child(4n+3),
         tbody tr:nth-child(4n+4) {
-            background-color: #d1f3ff; /* Next two rows: lighter blue */
+            background-color: #272a2e;
         }
+
+        td:first-child {
+            text-align: left;
+            font-weight: bold;
+        }
+
+        /* Responsive styling for smaller screens */
+        @media (max-width: 768px) {
+            th, td {
+                font-size: 10px; /* Further reduce font size on small screens */
+                padding: 3px; /* Further reduce padding */
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+        }
+        
     </style>
 </head>
 <body>
 
     <!-- Insert Navbar Fragment -->
-    <div th:insert="~{navbar :: navbar}"></div>
+    <div th:insert="~{navbar :: navbar(sportKey=${sportKey}, marketType=${marketType})}"></div>
 
-    <div class="container">
-        <h1 class="my-4">H2H Odds</h1>
+    <!-- Insert Sidebar Fragment -->
+    <div th:insert="~{sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1 class="my-4">Moneyline Odds - [[${sportName}]]</h1>
 
         <!-- Table of Matchups and H2H Odds -->
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Team</th>
-                    <th th:each="bookmaker : ${uniqueBookmakers}" th:text="${bookmaker.title}"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Iterate once through the oddsList and generate two rows (home and away team) per iteration -->
-                <th:block th:each="odds : ${oddsList}">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
                     <tr>
-                        <td th:text="${odds.homeTeam}"></td>
-                        <td th:each="bookmaker : ${uniqueBookmakers}">
-                            <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
-                                <p th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
-                                    <span th:if="${market.key == 'h2h'}" th:each="outcome : ${market.outcomes}">
-                                        <span th:if="${outcome.name == odds.homeTeam}" th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
-                                    </span>
-                                </p>
-                            </div>
-                            <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] == null}">
-                                <p>No odds available</p>
-                            </div>
-                        </td>
+                        <th>Team</th>
+                        <th th:each="bookmaker : ${uniqueBookmakers}" th:text="${bookmaker.title}"></th>
                     </tr>
-                    <tr>
-                        <td th:text="${odds.awayTeam}"></td>
-                        <td th:each="bookmaker : ${uniqueBookmakers}">
-                            <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
-                                <p th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
-                                    <span th:if="${market.key == 'h2h'}" th:each="outcome : ${market.outcomes}">
-                                        <span th:if="${outcome.name == odds.awayTeam}" th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
-                                    </span>
-                                </p>
-                            </div>
-                            <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] == null}">
-                                <p>No odds available</p>
-                            </div>
-                        </td>
-                    </tr>
-                </th:block>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <th:block th:each="odds : ${oddsList}">
+                        <tr>
+                            <td th:text="${odds.homeTeam}"></td>
+                            <td th:each="bookmaker : ${uniqueBookmakers}">
+                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
+                                    <p th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
+                                        <span th:if="${market.key == 'h2h'}" th:each="outcome : ${market.outcomes}">
+                                            <span th:if="${outcome.name == odds.homeTeam}" th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
+                                        </span>
+                                    </p>
+                                </div>
+                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] == null}">
+                                    <p>No odds available</p>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td th:text="${odds.awayTeam}"></td>
+                            <td th:each="bookmaker : ${uniqueBookmakers}">
+                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
+                                    <p th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
+                                        <span th:if="${market.key == 'h2h'}" th:each="outcome : ${market.outcomes}">
+                                            <span th:if="${outcome.name == odds.awayTeam}" th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
+                                        </span>
+                                    </p>
+                                </div>
+                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] == null}">
+                                    <p>No odds available</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </th:block>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Bootstrap JS (optional) -->
@@ -93,5 +147,3 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-

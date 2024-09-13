@@ -3,6 +3,7 @@ package com.bluechip.demo.service;
 import com.bluechip.demo.model.Odds;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -12,13 +13,23 @@ import java.util.List;
 @Service
 public class OddsService {
 
-    public List<Odds> readOddsFromFile() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        File file = new File("src/main/resources/odds.json");
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-        // Map JSON data to a list of Odds objects
-        List<Odds> oddsList = objectMapper.readValue(file, new TypeReference<List<Odds>>() {});
-        
-        return oddsList;
+    @Autowired
+    private OddsApiService oddsApiService;
+
+    public List<Odds> getOddsData(String sportKey, String marketType) throws IOException {
+        String fileName = "odds_" + sportKey + "_" + marketType + ".json";
+        File file = new File(fileName);
+
+        // Check if the file exists
+        if (!file.exists()) {
+            // Fetch data from API and save it
+            String jsonData = oddsApiService.fetchOddsForSportAndMarket(sportKey, marketType);
+            oddsApiService.saveResponseToFile(jsonData, fileName);
+        }
+
+        // Read data from the JSON file
+        return objectMapper.readValue(file, new TypeReference<List<Odds>>() {});
     }
 }
