@@ -11,6 +11,14 @@
             color: #c9c9c9;
             margin: 0;
             padding: 0;
+            padding-top: 56px; /* Adjust for navbar height */
+        }
+
+        /* Ensure the navbar stays fixed at the top */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
         }
 
         /* Main content layout with space for sidebar */
@@ -18,11 +26,15 @@
             margin-left: 270px; /* Leave space for the sidebar */
             padding: 20px;
             width: calc(100% - 270px);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 56px); /* Adjust for navbar height */
         }
 
         /* Table responsiveness and styling */
         .table-responsive {
-            overflow-x: auto;
+            flex-grow: 1;
+            overflow-y: auto;
             margin-top: 20px;
         }
 
@@ -42,8 +54,12 @@
             white-space: nowrap;
         }
 
-        th {
-            background-color: #2a2c2e;
+        /* Make table header sticky */
+        thead th {
+            position: sticky;
+            top: 0;
+            background-color: #2a2c2e; /* Same as th background */
+            z-index: 2;
             font-weight: bold;
         }
 
@@ -83,10 +99,10 @@
 <body>
 
     <!-- Insert Navbar Fragment with Parameters -->
-    <div th:insert="~{navbar :: navbar(sportKey=${sportKey}, marketType=${marketType})}"></div>
+    <div th:insert="~{navbar :: navbar(sportKey=${sportKey}, marketType=${marketType})}" class="navbar"></div>
 
     <!-- Insert Sidebar Fragment with Parameters -->
-    <div th:insert="~{sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
+    <div th:insert="~{sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}" class="sidebar"></div>
 
     <!-- Main Content -->
     <div class="main-content">
