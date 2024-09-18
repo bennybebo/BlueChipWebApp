@@ -94,6 +94,13 @@
                 height: auto;
             }
         }
+        
+        .bookmaker-logo {
+            width: 25px; /* Adjust as needed */
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
@@ -113,14 +120,20 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
+                    	<th>Date</th>
                         <th>Matchup</th>
-                        <th th:each="bookmaker : ${uniqueBookmakers}" th:text="${bookmaker.title}"></th>
+                        <th th:each="bookmaker : ${uniqueBookmakers}">
+				            <img th:src="@{/images/{logoImageName}.webp(logoImageName=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+				                 th:title="${bookmaker.title}"
+				                 th:alt="${bookmaker.title}"
+				                 class="bookmaker-logo">
+				        </th>
                     </tr>
                 </thead>
                 <tbody>
                     <th:block th:each="odds : ${oddsList}">
                         <tr>
-                            <!-- Matchup -->
+                        	<td th:text="${odds.formattedCommenceTime}"></td>
                             <td th:text="${odds.homeTeam} + ' vs ' + ${odds.awayTeam}"></td>
                             <td th:each="bookmaker : ${uniqueBookmakers}">
                                 <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">

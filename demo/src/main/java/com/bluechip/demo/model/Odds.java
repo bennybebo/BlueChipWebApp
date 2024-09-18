@@ -1,6 +1,10 @@
 package com.bluechip.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class Odds {
@@ -24,6 +28,30 @@ public class Odds {
 
     private List<Bookmaker> bookmakers;
 
+    // Method to parse commenceTime string into ZonedDateTime
+    public ZonedDateTime getCommenceTimeAsZonedDateTime() {
+        try {
+            // Assuming commenceTime is in ISO 8601 format (e.g., "2024-09-22T17:01:00Z")
+            ZonedDateTime zonedDateTime = ZonedDateTime.parse(commenceTime);
+            // Convert the time to Eastern Standard Time (EST)
+            return zonedDateTime.withZoneSameInstant(ZoneId.of("America/New_York"));
+        } catch (Exception e) {
+            // Handle parsing error, return null or log error
+            return null;
+        }
+    }
+
+    // Method to return formatted commenceTime for display
+    public String getFormattedCommenceTime() {
+        ZonedDateTime zonedDateTime = getCommenceTimeAsZonedDateTime();
+        if (zonedDateTime != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d - h:mm a");
+            return zonedDateTime.format(formatter);
+        }
+        return "";
+    }
+
+    
     // Getters and Setters
     public String getId() {
         return id;
