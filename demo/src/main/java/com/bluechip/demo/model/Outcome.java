@@ -1,9 +1,9 @@
 package com.bluechip.demo.model;
 
 public class Outcome {
-    private String name;
-    private int price;
-    private double point;
+    private String name; // e.g. (Over/Under)
+    private int price; // e.g. (+150/-150)
+    private double point; // e.g. 57.5 as in O/U 57.5 points
 
     // Getters and Setters
     public String getName() {

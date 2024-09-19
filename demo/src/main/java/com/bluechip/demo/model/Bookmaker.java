@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public class Bookmaker {
-    private String key;
-    private String title;
+    private String key; // e.g (draftkings)
+    private String title; // e.g. (DraftKings)
     
     @JsonProperty("last_update")
     private String lastUpdate;

@@ -120,32 +120,62 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                    	<th>Date</th>
+                        <th>Date</th>
                         <th>Matchup</th>
+                        <th>Best Totals</th> <!-- New column for best totals -->
                         <th th:each="bookmaker : ${uniqueBookmakers}">
-				            <img th:src="@{/images/{logoImageName}.webp(logoImageName=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-				                 th:title="${bookmaker.title}"
-				                 th:alt="${bookmaker.title}"
-				                 class="bookmaker-logo">
-				        </th>
+                            <img th:src="@{/images/{logoImageName}.webp(logoImageName=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                 th:title="${bookmaker.title}"
+                                 th:alt="${bookmaker.title}"
+                                 class="bookmaker-logo">
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     <th:block th:each="odds : ${oddsList}">
                         <tr>
-                        	<td th:text="${odds.formattedCommenceTime}"></td>
+                            <td th:text="${odds.formattedCommenceTime}"></td>
                             <td th:text="${odds.homeTeam} + ' vs ' + ${odds.awayTeam}"></td>
+
+                            <!-- Best Totals Column -->
+                            <td>
+                                <!-- Best Over -->
+                                <div th:if="${odds.bestOdds.bestOverOutcome != null}">
+                                    <span th:text="${'Over ' + odds.bestOdds.bestOverOutcome.point}"></span>
+                                    &nbsp;&nbsp;
+                                    <span th:text="${odds.bestOdds.bestOverOutcome.price > 0 ? '+' + odds.bestOdds.bestOverOutcome.price : odds.bestOdds.bestOverOutcome.price}"></span>
+                                    <img th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestOverBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                         th:title="${odds.bestOdds.bestOverBookmaker.title}"
+                                         th:alt="${odds.bestOdds.bestOverBookmaker.title}"
+                                         class="bookmaker-logo">
+                                </div>
+                                <!-- Best Under -->
+                                <div th:if="${odds.bestOdds.bestUnderOutcome != null}">
+                                    <span th:text="${'Under ' + odds.bestOdds.bestUnderOutcome.point}"></span>
+                                    &nbsp;&nbsp;
+                                    <span th:text="${odds.bestOdds.bestUnderOutcome.price > 0 ? '+' + odds.bestOdds.bestUnderOutcome.price : odds.bestOdds.bestUnderOutcome.price}"></span>
+                                    <img th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestUnderBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                         th:title="${odds.bestOdds.bestUnderBookmaker.title}"
+                                         th:alt="${odds.bestOdds.bestUnderBookmaker.title}"
+                                         class="bookmaker-logo">
+                                </div>
+                            </td>
+
+                            <!-- Existing bookmaker odds columns -->
                             <td th:each="bookmaker : ${uniqueBookmakers}">
                                 <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
                                     <div th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
                                         <div th:if="${market.key == 'totals'}">
                                             <div th:each="outcome : ${market.outcomes}">
                                                 <div>
-                                                    <span th:text="${outcome.name}"></span>
+                                                    <span th:text="${outcome.name}"
+                                                          th:classappend="${(outcome.name == 'Over' && outcome == odds.bestOdds.bestOverOutcome) || (outcome.name == 'Under' && outcome == odds.bestOdds.bestUnderOutcome) ? 'best-odds' : ''}"></span>
                                                     &nbsp;
-                                                    <span th:text="${outcome.point}"></span>
+                                                    <span th:text="${outcome.point}"
+                                                          th:classappend="${(outcome.name == 'Over' && outcome == odds.bestOdds.bestOverOutcome) || (outcome.name == 'Under' && outcome == odds.bestOdds.bestUnderOutcome) ? 'best-odds' : ''}"></span>
                                                     &nbsp;&nbsp;
-                                                    <span th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
+                                                    <span th:text="${outcome.price > 0 ? '+' + outcome.price : outcome.price}"
+                                                          th:classappend="${(outcome.name == 'Over' && outcome == odds.bestOdds.bestOverOutcome) || (outcome.name == 'Under' && outcome == odds.bestOdds.bestUnderOutcome) ? 'best-odds' : ''}"></span>
                                                 </div>
                                             </div>
                                         </div>

@@ -124,6 +124,7 @@
 				    <tr>
 				    	<th>Date</th>
 				        <th>Team</th>
+				        <th>Best Odds</th>
 				        <th th:each="bookmaker : ${uniqueBookmakers}">
 				            <img th:src="@{/images/{logoImageName}.webp(logoImageName=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
 				                 th:title="${bookmaker.title}"
@@ -134,14 +135,29 @@
 				</thead>
                 <tbody>
                    <th:block th:each="odds : ${oddsList}">
+					    <!-- Home Team Row -->
 					    <tr>
 					        <td th:text="${odds.formattedCommenceTime}"></td>
 					        <td th:text="${odds.homeTeam}"></td>
+					        
+					        <!-- Best Odds Column for Home Team -->
+					        <td>
+					            <span th:text="${odds.bestOdds.bestH2HHomeOutcome != null ? (odds.bestOdds.bestH2HHomeOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HHomeOutcome.price : odds.bestOdds.bestH2HHomeOutcome.price) : 'N/A'}"></span>
+					            <img th:if="${odds.bestOdds.bestH2HHomeBookmaker != null}"
+					                 th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HHomeBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+					                 th:title="${odds.bestOdds.bestH2HHomeBookmaker.title}"
+					                 th:alt="${odds.bestOdds.bestH2HHomeBookmaker.title}"
+					                 class="bookmaker-logo">
+					        </td>
+					        
+					        <!-- Existing bookmaker odds columns -->
 					        <td th:each="bookmaker : ${uniqueBookmakers}">
 					            <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
 					                <p th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
 					                    <span th:if="${market.key == 'h2h'}" th:each="outcome : ${market.outcomes}">
-					                        <span th:if="${outcome.name == odds.homeTeam}" th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
+					                        <span th:if="${outcome.name == odds.homeTeam}" 
+					                              th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"
+					                              th:classappend="${outcome == odds.bestOdds.bestH2HHomeOutcome} ? 'best-odds' : ''"></span>
 					                    </span>
 					                </p>
 					            </div>
@@ -150,14 +166,30 @@
 					            </div>
 					        </td>
 					    </tr>
+					    
+					    <!-- Away Team Row -->
 					    <tr>
 					        <td></td>  <!-- Leave this cell empty for the second row date -->
 					        <td th:text="${odds.awayTeam}"></td>
+					        
+					        <!-- Best Odds Column for Away Team -->
+					        <td>
+					            <span th:text="${odds.bestOdds.bestH2HAwayOutcome != null ? (odds.bestOdds.bestH2HAwayOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HAwayOutcome.price : odds.bestOdds.bestH2HAwayOutcome.price) : 'N/A'}"></span>
+					            <img th:if="${odds.bestOdds.bestH2HAwayBookmaker != null}"
+					                 th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HAwayBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+					                 th:title="${odds.bestOdds.bestH2HAwayBookmaker.title}"
+					                 th:alt="${odds.bestOdds.bestH2HAwayBookmaker.title}"
+					                 class="bookmaker-logo">
+					        </td>
+					        
+					        <!-- Existing bookmaker odds columns -->
 					        <td th:each="bookmaker : ${uniqueBookmakers}">
 					            <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
 					                <p th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
 					                    <span th:if="${market.key == 'h2h'}" th:each="outcome : ${market.outcomes}">
-					                        <span th:if="${outcome.name == odds.awayTeam}" th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"></span>
+					                        <span th:if="${outcome.name == odds.awayTeam}" 
+					                              th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"
+					                              th:classappend="${outcome == odds.bestOdds.bestH2HAwayOutcome} ? 'best-odds' : ''"></span>
 					                    </span>
 					                </p>
 					            </div>
@@ -167,6 +199,7 @@
 					        </td>
 					    </tr>
 					</th:block>
+
 				</tbody>
             </table>
         </div>

@@ -11,7 +11,7 @@ public class Odds {
 
     private String id;
 
-    @JsonProperty("sport_key")  // Map "sport_key" to the Java field "sportKey"
+    @JsonProperty("sport_key")  // Map "sport_key" to the Java field "sportKey" e.g.(americanfootball_nfl)
     private String sportKey;
 
     @JsonProperty("sport_title")  // Map "sport_title" to the Java field "sportTitle"
@@ -27,6 +27,8 @@ public class Odds {
     private String awayTeam;
 
     private List<Bookmaker> bookmakers;
+    
+    private BestOdds bestOdds;
 
     // Method to parse commenceTime string into ZonedDateTime
     public ZonedDateTime getCommenceTimeAsZonedDateTime() {
@@ -108,4 +110,12 @@ public class Odds {
     public void setBookmakers(List<Bookmaker> bookmakers) {
         this.bookmakers = bookmakers;
     }
+
+	public BestOdds getBestOdds() {
+		return bestOdds;
+	}
+
+	public void setBestOdds(BestOdds bestOdds) {
+		this.bestOdds = bestOdds;
+	}
 }
