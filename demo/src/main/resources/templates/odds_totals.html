@@ -101,6 +101,24 @@
             display: block;
             margin: 0 auto;
         }
+        
+        .table-responsive::-webkit-scrollbar {
+		    width: 12px;
+		}
+		
+		.table-responsive::-webkit-scrollbar-track {
+		    background: #f1f1f1;
+		    border-radius: 10px;
+		}
+		
+		.table-responsive::-webkit-scrollbar-thumb {
+		    background: #888;
+		    border-radius: 10px;
+		}
+		
+		.table-responsive::-webkit-scrollbar-thumb:hover {
+		    background: #555;
+		}
     </style>
 </head>
 <body>
@@ -142,22 +160,31 @@
                                 <!-- Best Over -->
                                 <div th:if="${odds.bestOdds.bestOverOutcome != null}">
                                     <span th:text="${'Over ' + odds.bestOdds.bestOverOutcome.point}"></span>
-                                    &nbsp;&nbsp;
+                                    <span th:if="${odds.bestOdds.bestOverOutcome.point != null && odds.bestOdds.bestOverOutcome.price != null}">
+                                        &nbsp;/&nbsp;
+                                    </span>
                                     <span th:text="${odds.bestOdds.bestOverOutcome.price > 0 ? '+' + odds.bestOdds.bestOverOutcome.price : odds.bestOdds.bestOverOutcome.price}"></span>
+                                    <span th:if="${odds.bestOdds.bestOverBookmaker != null}">&nbsp;</span>
                                     <img th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestOverBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
                                          th:title="${odds.bestOdds.bestOverBookmaker.title}"
                                          th:alt="${odds.bestOdds.bestOverBookmaker.title}"
-                                         class="bookmaker-logo">
+                                         class="bookmaker-logo"
+                                         style="vertical-align: middle; display: inline;">
                                 </div>
+
                                 <!-- Best Under -->
                                 <div th:if="${odds.bestOdds.bestUnderOutcome != null}">
                                     <span th:text="${'Under ' + odds.bestOdds.bestUnderOutcome.point}"></span>
-                                    &nbsp;&nbsp;
+                                    <span th:if="${odds.bestOdds.bestUnderOutcome.point != null && odds.bestOdds.bestUnderOutcome.price != null}">
+                                        &nbsp;/&nbsp;
+                                    </span>
                                     <span th:text="${odds.bestOdds.bestUnderOutcome.price > 0 ? '+' + odds.bestOdds.bestUnderOutcome.price : odds.bestOdds.bestUnderOutcome.price}"></span>
+                                    <span th:if="${odds.bestOdds.bestUnderBookmaker != null}">&nbsp;</span>
                                     <img th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestUnderBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
                                          th:title="${odds.bestOdds.bestUnderBookmaker.title}"
                                          th:alt="${odds.bestOdds.bestUnderBookmaker.title}"
-                                         class="bookmaker-logo">
+                                         class="bookmaker-logo"
+                                         style="vertical-align: middle; display: inline;">
                                 </div>
                             </td>
 
@@ -173,7 +200,9 @@
                                                     &nbsp;
                                                     <span th:text="${outcome.point}"
                                                           th:classappend="${(outcome.name == 'Over' && outcome == odds.bestOdds.bestOverOutcome) || (outcome.name == 'Under' && outcome == odds.bestOdds.bestUnderOutcome) ? 'best-odds' : ''}"></span>
-                                                    &nbsp;&nbsp;
+                                                    <span th:if="${outcome.point != null && outcome.price != null}">
+                                                        &nbsp;/&nbsp;
+                                                    </span>
                                                     <span th:text="${outcome.price > 0 ? '+' + outcome.price : outcome.price}"
                                                           th:classappend="${(outcome.name == 'Over' && outcome == odds.bestOdds.bestOverOutcome) || (outcome.name == 'Under' && outcome == odds.bestOdds.bestUnderOutcome) ? 'best-odds' : ''}"></span>
                                                 </div>

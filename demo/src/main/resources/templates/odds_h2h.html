@@ -103,6 +103,24 @@
             display: block;
             margin: 0 auto;
         }
+        
+        .table-responsive::-webkit-scrollbar {
+		    width: 12px;
+		}
+		
+		.table-responsive::-webkit-scrollbar-track {
+		    background: #f1f1f1;
+		    border-radius: 10px;
+		}
+		
+		.table-responsive::-webkit-scrollbar-thumb {
+		    background: #888;
+		    border-radius: 10px;
+		}
+		
+		.table-responsive::-webkit-scrollbar-thumb:hover {
+		    background: #555;
+		}
     </style>
 </head>
 <body>
@@ -142,14 +160,15 @@
 					        
 					        <!-- Best Odds Column for Home Team -->
 					        <td>
-					            <span th:text="${odds.bestOdds.bestH2HHomeOutcome != null ? (odds.bestOdds.bestH2HHomeOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HHomeOutcome.price : odds.bestOdds.bestH2HHomeOutcome.price) : 'N/A'}"></span>
-					            <img th:if="${odds.bestOdds.bestH2HHomeBookmaker != null}"
-					                 th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HHomeBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-					                 th:title="${odds.bestOdds.bestH2HHomeBookmaker.title}"
-					                 th:alt="${odds.bestOdds.bestH2HHomeBookmaker.title}"
-					                 class="bookmaker-logo">
-					        </td>
-					        
+							    <span th:text="${odds.bestOdds.bestH2HHomeOutcome != null ? (odds.bestOdds.bestH2HHomeOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HHomeOutcome.price : odds.bestOdds.bestH2HHomeOutcome.price) : 'N/A'}"></span>
+							    <span th:if="${odds.bestOdds.bestH2HHomeBookmaker != null}">&nbsp;</span>
+							    <img th:if="${odds.bestOdds.bestH2HHomeBookmaker != null}"
+							         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HHomeBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+							         th:title="${odds.bestOdds.bestH2HHomeBookmaker.title}"
+							         th:alt="${odds.bestOdds.bestH2HHomeBookmaker.title}"
+							         class="bookmaker-logo"
+							         style="vertical-align: middle; display: inline;">
+							</td>					        
 					        <!-- Existing bookmaker odds columns -->
 					        <td th:each="bookmaker : ${uniqueBookmakers}">
 					            <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
@@ -165,8 +184,7 @@
 					                <p>No odds available</p>
 					            </div>
 					        </td>
-					    </tr>
-					    
+					    </tr>					    
 					    <!-- Away Team Row -->
 					    <tr>
 					        <td></td>  <!-- Leave this cell empty for the second row date -->
@@ -174,14 +192,15 @@
 					        
 					        <!-- Best Odds Column for Away Team -->
 					        <td>
-					            <span th:text="${odds.bestOdds.bestH2HAwayOutcome != null ? (odds.bestOdds.bestH2HAwayOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HAwayOutcome.price : odds.bestOdds.bestH2HAwayOutcome.price) : 'N/A'}"></span>
-					            <img th:if="${odds.bestOdds.bestH2HAwayBookmaker != null}"
-					                 th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HAwayBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-					                 th:title="${odds.bestOdds.bestH2HAwayBookmaker.title}"
-					                 th:alt="${odds.bestOdds.bestH2HAwayBookmaker.title}"
-					                 class="bookmaker-logo">
-					        </td>
-					        
+							    <span th:text="${odds.bestOdds.bestH2HAwayOutcome != null ? (odds.bestOdds.bestH2HAwayOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HAwayOutcome.price : odds.bestOdds.bestH2HAwayOutcome.price) : 'N/A'}"></span>
+							    <span th:if="${odds.bestOdds.bestH2HAwayBookmaker != null}">&nbsp;</span>
+							    <img th:if="${odds.bestOdds.bestH2HAwayBookmaker != null}"
+							         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HAwayBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+							         th:title="${odds.bestOdds.bestH2HAwayBookmaker.title}"
+							         th:alt="${odds.bestOdds.bestH2HAwayBookmaker.title}"
+							         class="bookmaker-logo"
+							         style="vertical-align: middle; display: inline;">
+							</td>					        
 					        <!-- Existing bookmaker odds columns -->
 					        <td th:each="bookmaker : ${uniqueBookmakers}">
 					            <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
