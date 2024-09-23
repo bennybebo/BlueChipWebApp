@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Totals Odds - [[${sportName}]]</title>
+    <title>Spreads Odds - [[${sportName}]]</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
@@ -39,36 +39,43 @@
         }
 
         table {
-            width: 100%;
+            width: auto !important; /* Ensures table doesn't stretch */
             border-collapse: collapse;
             font-family: Arial, sans-serif;
             font-size: 12px; /* Reduced font size */
         }
 
         th, td {
-            padding: 5px; /* Reduced padding for smaller spacing */
+            padding: 3px; /* Reduced padding for smaller spacing */
             margin: 0;
             text-align: center;
+            vertical-align: middle;
             border: 1px solid #3c3f41;
             color: #ffffff;
             white-space: nowrap;
+        }
+
+        /* Center the date in its cell */
+        .date-cell {
+            text-align: center;
+            vertical-align: middle;
         }
 
         /* Make table header sticky */
         thead th {
             position: sticky;
             top: 0;
-            background-color: #2a2c2e; /* Same as th background */
+            background-color: #2a2c2e;
             z-index: 2;
             font-weight: bold;
         }
 
         /* Custom alternating row colors */
-        tbody tr:nth-child(2n+1) {
+        tbody tr:nth-child(2n) {
             background-color: #1c2125;
         }
 
-        tbody tr:nth-child(2n) {
+        tbody tr:nth-child(2n+1) {
             background-color: #272a2e;
         }
 
@@ -80,8 +87,8 @@
         /* Responsive styling for smaller screens */
         @media (max-width: 768px) {
             th, td {
-                font-size: 10px; /* Further reduce font size on small screens */
-                padding: 3px; /* Further reduce padding */
+                font-size: 10px;
+                padding: 2px;
             }
 
             .main-content {
@@ -94,31 +101,48 @@
                 height: auto;
             }
         }
-        
+
         .bookmaker-logo {
-            width: 25px; /* Adjust as needed */
+            width: 25px;
             height: auto;
             display: block;
             margin: 0 auto;
         }
-        
+
+        /* Smaller logos in best odds column */
+        .best-odds-logo {
+            width: 20px;
+            height: auto;
+        }
+
+        /* Custom scrollbar styling */
         .table-responsive::-webkit-scrollbar {
-		    width: 12px;
-		}
-		
-		.table-responsive::-webkit-scrollbar-track {
-		    background: #f1f1f1;
-		    border-radius: 10px;
-		}
-		
-		.table-responsive::-webkit-scrollbar-thumb {
-		    background: #888;
-		    border-radius: 10px;
-		}
-		
-		.table-responsive::-webkit-scrollbar-thumb:hover {
-		    background: #555;
-		}
+            width: 12px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Added classes for spacing */
+        .team-name, .odds-entry {
+            margin-bottom: 8px;
+        }
+
+        .odds-logo {
+            vertical-align: middle;
+            display: inline;
+        }
     </style>
 </head>
 <body>
@@ -153,41 +177,59 @@
                     <th:block th:each="odds : ${oddsList}">
                         <tr>
                             <td th:text="${odds.formattedCommenceTime}"></td>
-                            <td th:text="${odds.homeTeam} + ' vs ' + ${odds.awayTeam}"></td>
-
-                            <!-- Best Totals Column -->
                             <td>
-                                <!-- Best Over -->
-                                <div th:if="${odds.bestOdds.bestOverOutcome != null}">
-                                    <span th:text="${'Over ' + odds.bestOdds.bestOverOutcome.point}"></span>
-                                    <span th:if="${odds.bestOdds.bestOverOutcome.point != null && odds.bestOdds.bestOverOutcome.price != null}">
-                                        &nbsp;/&nbsp;
-                                    </span>
-                                    <span th:text="${odds.bestOdds.bestOverOutcome.price > 0 ? '+' + odds.bestOdds.bestOverOutcome.price : odds.bestOdds.bestOverOutcome.price}"></span>
-                                    <span th:if="${odds.bestOdds.bestOverBookmaker != null}">&nbsp;</span>
-                                    <img th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestOverBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-                                         th:title="${odds.bestOdds.bestOverBookmaker.title}"
-                                         th:alt="${odds.bestOdds.bestOverBookmaker.title}"
-                                         class="bookmaker-logo"
-                                         style="vertical-align: middle; display: inline;">
+                                <div class="team-name">
+                                    <span th:text="${odds.homeTeam}"></span>
                                 </div>
-
-                                <!-- Best Under -->
-                                <div th:if="${odds.bestOdds.bestUnderOutcome != null}">
-                                    <span th:text="${'Under ' + odds.bestOdds.bestUnderOutcome.point}"></span>
-                                    <span th:if="${odds.bestOdds.bestUnderOutcome.point != null && odds.bestOdds.bestUnderOutcome.price != null}">
-                                        &nbsp;/&nbsp;
-                                    </span>
-                                    <span th:text="${odds.bestOdds.bestUnderOutcome.price > 0 ? '+' + odds.bestOdds.bestUnderOutcome.price : odds.bestOdds.bestUnderOutcome.price}"></span>
-                                    <span th:if="${odds.bestOdds.bestUnderBookmaker != null}">&nbsp;</span>
-                                    <img th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestUnderBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-                                         th:title="${odds.bestOdds.bestUnderBookmaker.title}"
-                                         th:alt="${odds.bestOdds.bestUnderBookmaker.title}"
-                                         class="bookmaker-logo"
-                                         style="vertical-align: middle; display: inline;">
+                                <div>
+                                    <span th:text="${odds.awayTeam}"></span>
                                 </div>
                             </td>
 
+                            <!-- Best Totals Column -->
+                            <td>
+                                <!-- Home Team Best Odds -->
+                                <div class="odds-entry">
+                                    <span th:if="${odds.bestOdds.bestOverOutcome != null}"
+							          th:text="${odds.bestOdds.bestOverOutcome.point != null ? (odds.bestOdds.bestOverOutcome.point > 0 ? '+' + odds.bestOdds.bestOverOutcome.point : odds.bestOdds.bestOverOutcome.point) : ''}">
+								    </span>
+								    <span th:if="${odds.bestOdds.bestOverOutcome != null && odds.bestOdds.bestOverOutcome.point != null && odds.bestOdds.bestOverOutcome.price != null}">
+								        &nbsp;/&nbsp;
+								    </span>
+								    <span th:if="${odds.bestOdds.bestOverOutcome != null}"
+								          th:text="${odds.bestOdds.bestOverOutcome.price != null ? (odds.bestOdds.bestOverOutcome.price > 0 ? '+' + odds.bestOdds.bestOverOutcome.price : odds.bestOdds.bestOverOutcome.price) : ''}">
+								    </span>
+								    <span th:if="${odds.bestOdds.bestOverOutcome != null && odds.bestOdds.bestOverBookmaker != null}">
+								        &nbsp;
+								    </span>
+                                    <img th:if="${odds.bestOdds.bestOverBookmaker != null}"
+                                         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestOverBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                         th:title="${odds.bestOdds.bestOverBookmaker.title}"
+                                         th:alt="${odds.bestOdds.bestOverBookmaker.title}"
+                                         class="bookmaker-logo odds-logo best-odds-logo">
+                                </div>
+
+                                <!-- Away Team Best Odds -->
+                                <div>
+                                    <span th:if="${odds.bestOdds.bestUnderOutcome != null}"
+							          th:text="${odds.bestOdds.bestUnderOutcome.point != null ? (odds.bestOdds.bestUnderOutcome.point > 0 ? '+' + odds.bestOdds.bestUnderOutcome.point : odds.bestOdds.bestUnderOutcome.point) : ''}">
+								    </span>
+								    <span th:if="${odds.bestOdds.bestUnderOutcome != null && odds.bestOdds.bestUnderOutcome.point != null && odds.bestOdds.bestUnderOutcome.price != null}">
+								        &nbsp;/&nbsp;
+								    </span>
+								    <span th:if="${odds.bestOdds.bestUnderOutcome != null}"
+								          th:text="${odds.bestOdds.bestUnderOutcome.price != null ? (odds.bestOdds.bestUnderOutcome.price > 0 ? '+' + odds.bestOdds.bestUnderOutcome.price : odds.bestOdds.bestUnderOutcome.price) : ''}">
+								    </span>
+								    <span th:if="${odds.bestOdds.bestUnderOutcome != null && odds.bestOdds.bestUnderBookmaker != null}">
+								        &nbsp;
+								    </span>
+                                    <img th:if="${odds.bestOdds.bestUnderBookmaker != null}"
+                                         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestUnderBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                         th:title="${odds.bestOdds.bestUnderBookmaker.title}"
+                                         th:alt="${odds.bestOdds.bestUnderBookmaker.title}"
+                                         class="bookmaker-logo odds-logo best-odds-logo">
+                                </div>
+                            </td>
                             <!-- Existing bookmaker odds columns -->
                             <td th:each="bookmaker : ${uniqueBookmakers}">
                                 <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
@@ -209,9 +251,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] == null}">
-                                    <p>No odds available</p>
                                 </div>
                             </td>
                         </tr>

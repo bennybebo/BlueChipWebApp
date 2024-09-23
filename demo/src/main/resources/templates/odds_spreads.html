@@ -39,38 +39,43 @@
         }
 
         table {
-            width: 100%;
+            width: auto !important; /* Ensures table doesn't stretch */
             border-collapse: collapse;
             font-family: Arial, sans-serif;
             font-size: 12px; /* Reduced font size */
         }
 
         th, td {
-            padding: 5px; /* Reduced padding for smaller spacing */
+            padding: 3px; /* Reduced padding for smaller spacing */
             margin: 0;
             text-align: center;
+            vertical-align: middle;
             border: 1px solid #3c3f41;
             color: #ffffff;
             white-space: nowrap;
+        }
+
+        /* Center the date in its cell */
+        .date-cell {
+            text-align: center;
+            vertical-align: middle;
         }
 
         /* Make table header sticky */
         thead th {
             position: sticky;
             top: 0;
-            background-color: #2a2c2e; /* Same as th background */
+            background-color: #2a2c2e;
             z-index: 2;
             font-weight: bold;
         }
 
         /* Custom alternating row colors */
-        tbody tr:nth-child(4n+1),
-        tbody tr:nth-child(4n+2) {
+        tbody tr:nth-child(2n) {
             background-color: #1c2125;
         }
 
-        tbody tr:nth-child(4n+3),
-        tbody tr:nth-child(4n+4) {
+        tbody tr:nth-child(2n+1) {
             background-color: #272a2e;
         }
 
@@ -82,8 +87,8 @@
         /* Responsive styling for smaller screens */
         @media (max-width: 768px) {
             th, td {
-                font-size: 10px; /* Further reduce font size on small screens */
-                padding: 3px; /* Further reduce padding */
+                font-size: 10px;
+                padding: 2px;
             }
 
             .main-content {
@@ -96,53 +101,69 @@
                 height: auto;
             }
         }
-        
+
         .bookmaker-logo {
-            width: 25px; /* Adjust as needed */
+            width: 25px;
             height: auto;
             display: block;
             margin: 0 auto;
         }
-        
+
+        /* Smaller logos in best odds column */
+        .best-odds-logo {
+            width: 20px;
+            height: auto;
+        }
+
+        /* Custom scrollbar styling */
         .table-responsive::-webkit-scrollbar {
-		    width: 12px;
-		}
-		
-		.table-responsive::-webkit-scrollbar-track {
-		    background: #f1f1f1;
-		    border-radius: 10px;
-		}
-		
-		.table-responsive::-webkit-scrollbar-thumb {
-		    background: #888;
-		    border-radius: 10px;
-		}
-		
-		.table-responsive::-webkit-scrollbar-thumb:hover {
-		    background: #555;
-		}
+            width: 12px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Added classes for spacing */
+        .team-name, .odds-entry {
+            margin-bottom: 8px;
+        }
+
+        .odds-logo {
+            vertical-align: middle;
+            display: inline;
+        }
     </style>
 </head>
 <body>
-
-    <!-- Insert Navbar Fragment with Parameters -->
+    <!-- Insert Navbar Fragment -->
     <div th:insert="~{navbar :: navbar(sportKey=${sportKey}, marketType=${marketType})}" class="navbar"></div>
 
-    <!-- Insert Sidebar Fragment with Parameters -->
+    <!-- Insert Sidebar Fragment -->
     <div th:insert="~{sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}" class="sidebar"></div>
 
     <!-- Main Content -->
     <div class="main-content">
         <h1 class="my-4">Spreads Odds - [[${sportName}]]</h1>
 
-        <!-- Table of Matchups and Spreads Odds -->
+        <!-- Table of Matchups and Spread Odds -->
         <div class="table-responsive">
             <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Team</th>
-                        <th>Best Spreads</th> <!-- New column for best spreads -->
+                        <th>Teams</th>
+                        <th>Best Odds</th>
                         <th th:each="bookmaker : ${uniqueBookmakers}">
                             <img th:src="@{/images/{logoImageName}.webp(logoImageName=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
                                  th:title="${bookmaker.title}"
@@ -153,99 +174,94 @@
                 </thead>
                 <tbody>
                     <th:block th:each="odds : ${oddsList}">
-                        <!-- Home Team Row -->
                         <tr>
-                            <td th:text="${odds.formattedCommenceTime}"></td>
-                            <td th:text="${odds.homeTeam}"></td>
+                            <!-- Date Cell -->
+                            <td th:text="${odds.formattedCommenceTime}" class="date-cell"></td>
 
-                            <!-- Best Spreads Column for Home Team -->
+                            <!-- Teams Cell with spacing -->
                             <td>
-							    <span th:if="${odds.bestOdds.bestSpreadHomeOutcome != null}"
+                                <div class="team-name">
+                                    <span th:text="${odds.homeTeam}"></span>
+                                </div>
+                                <div>
+                                    <span th:text="${odds.awayTeam}"></span>
+                                </div>
+                            </td>
+
+                            <!-- Best Odds Cell with smaller logos -->
+                            <td>
+                                <!-- Home Team Best Odds -->
+                                <div class="odds-entry">
+                                    <span th:if="${odds.bestOdds.bestSpreadHomeOutcome != null}"
 							          th:text="${odds.bestOdds.bestSpreadHomeOutcome.point != null ? (odds.bestOdds.bestSpreadHomeOutcome.point > 0 ? '+' + odds.bestOdds.bestSpreadHomeOutcome.point : odds.bestOdds.bestSpreadHomeOutcome.point) : ''}">
-							    </span>
-							    <span th:if="${odds.bestOdds.bestSpreadHomeOutcome != null && odds.bestOdds.bestSpreadHomeOutcome.point != null && odds.bestOdds.bestSpreadHomeOutcome.price != null}">
-							        &nbsp;/&nbsp;
-							    </span>
-							    <span th:if="${odds.bestOdds.bestSpreadHomeOutcome != null}"
-							          th:text="${odds.bestOdds.bestSpreadHomeOutcome.price != null ? (odds.bestOdds.bestSpreadHomeOutcome.price > 0 ? '+' + odds.bestOdds.bestSpreadHomeOutcome.price : odds.bestOdds.bestSpreadHomeOutcome.price) : ''}">
-							    </span>
-							    <span th:if="${odds.bestOdds.bestSpreadHomeOutcome != null && odds.bestOdds.bestSpreadHomeBookmaker != null}">
-							        &nbsp;
-							    </span>
-							    <img th:if="${odds.bestOdds.bestSpreadHomeBookmaker != null}"
-							         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestSpreadHomeBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-							         th:title="${odds.bestOdds.bestSpreadHomeBookmaker.title}"
-							         th:alt="${odds.bestOdds.bestSpreadHomeBookmaker.title}"
-							         class="bookmaker-logo"
-							         style="vertical-align: middle; display: inline;">
-							</td>
-                            <!-- Existing bookmaker odds columns -->
+								    </span>
+								    <span th:if="${odds.bestOdds.bestSpreadHomeOutcome != null && odds.bestOdds.bestSpreadHomeOutcome.point != null && odds.bestOdds.bestSpreadHomeOutcome.price != null}">
+								        &nbsp;/&nbsp;
+								    </span>
+								    <span th:if="${odds.bestOdds.bestSpreadHomeOutcome != null}"
+								          th:text="${odds.bestOdds.bestSpreadHomeOutcome.price != null ? (odds.bestOdds.bestSpreadHomeOutcome.price > 0 ? '+' + odds.bestOdds.bestSpreadHomeOutcome.price : odds.bestOdds.bestSpreadHomeOutcome.price) : ''}">
+								    </span>
+								    <span th:if="${odds.bestOdds.bestSpreadHomeOutcome != null && odds.bestOdds.bestSpreadHomeBookmaker != null}">
+								        &nbsp;
+								    </span>
+                                    <img th:if="${odds.bestOdds.bestSpreadHomeBookmaker != null}"
+                                         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestSpreadHomeBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                         th:title="${odds.bestOdds.bestSpreadHomeBookmaker.title}"
+                                         th:alt="${odds.bestOdds.bestSpreadHomeBookmaker.title}"
+                                         class="bookmaker-logo odds-logo best-odds-logo">
+                                </div>
+
+                                <!-- Away Team Best Odds -->
+                                <div>
+                                    <span th:if="${odds.bestOdds.bestSpreadAwayOutcome != null}"
+							          th:text="${odds.bestOdds.bestSpreadAwayOutcome.point != null ? (odds.bestOdds.bestSpreadAwayOutcome.point > 0 ? '+' + odds.bestOdds.bestSpreadAwayOutcome.point : odds.bestOdds.bestSpreadAwayOutcome.point) : ''}">
+								    </span>
+								    <span th:if="${odds.bestOdds.bestSpreadAwayOutcome != null && odds.bestOdds.bestSpreadAwayOutcome.point != null && odds.bestOdds.bestSpreadAwayOutcome.price != null}">
+								        &nbsp;/&nbsp;
+								    </span>
+								    <span th:if="${odds.bestOdds.bestSpreadAwayOutcome != null}"
+								          th:text="${odds.bestOdds.bestSpreadAwayOutcome.price != null ? (odds.bestOdds.bestSpreadAwayOutcome.price > 0 ? '+' + odds.bestOdds.bestSpreadAwayOutcome.price : odds.bestOdds.bestSpreadAwayOutcome.price) : ''}">
+								    </span>
+								    <span th:if="${odds.bestOdds.bestSpreadAwayOutcome != null && odds.bestOdds.bestSpreadAwayBookmaker != null}">
+								        &nbsp;
+								    </span>
+                                    <img th:if="${odds.bestOdds.bestSpreadAwayBookmaker != null}"
+                                         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestSpreadAwayBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                         th:title="${odds.bestOdds.bestSpreadAwayBookmaker.title}"
+                                         th:alt="${odds.bestOdds.bestSpreadAwayBookmaker.title}"
+                                         class="bookmaker-logo odds-logo best-odds-logo">
+                                </div>
+                            </td>
+
+                            <!-- Bookmaker Odds Cells -->
                             <td th:each="bookmaker : ${uniqueBookmakers}">
                                 <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
-                                    <div th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
-                                        <div th:if="${market.key == 'spreads'}">
-                                            <div th:each="outcome : ${market.outcomes}">
-                                                <div th:if="${outcome.name == odds.homeTeam}">
+                                    <div th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}" th:if="${market.key == 'spreads'}">
+                                        <!-- Home Team Odds -->
+                                        <div class="odds-entry">
+                                            <span th:each="outcome : ${market.outcomes}">
+                                            	<span th:if="${outcome.name == odds.homeTeam}">
                                                     <span th:text="${outcome.point != null && outcome.point > 0 ? '+' + outcome.point : outcome.point}"
                                                           th:classappend="${outcome == odds.bestOdds.bestSpreadHomeOutcome} ? 'best-odds' : ''"></span>
                                                     &nbsp;/&nbsp;
                                                     <span th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"
                                                           th:classappend="${outcome == odds.bestOdds.bestSpreadHomeOutcome} ? 'best-odds' : ''"></span>
-                                                </div>
-                                            </div>
+                                            	</span>
+                                            </span>
                                         </div>
-                                    </div>
-                                </div>
-                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] == null}">
-                                    <p>No odds available</p>
-                                </div>
-                            </td>
-                        </tr>
-                        <!-- Away Team Row -->
-                        <tr>
-                            <td></td>
-                            <td th:text="${odds.awayTeam}"></td>
-
-                            <!-- Best Spreads Column for Away Team -->
-                            <td>
-							    <span th:if="${odds.bestOdds.bestSpreadAwayOutcome != null}"
-							          th:text="${odds.bestOdds.bestSpreadAwayOutcome.point != null ? (odds.bestOdds.bestSpreadAwayOutcome.point > 0 ? '+' + odds.bestOdds.bestSpreadAwayOutcome.point : odds.bestOdds.bestSpreadAwayOutcome.point) : ''}">
-							    </span>
-							    <span th:if="${odds.bestOdds.bestSpreadAwayOutcome != null && odds.bestOdds.bestSpreadAwayOutcome.point != null && odds.bestOdds.bestSpreadAwayOutcome.price != null}">
-							        &nbsp;/&nbsp;
-							    </span>
-							    <span th:if="${odds.bestOdds.bestSpreadAwayOutcome != null}"
-							          th:text="${odds.bestOdds.bestSpreadAwayOutcome.price != null ? (odds.bestOdds.bestSpreadAwayOutcome.price > 0 ? '+' + odds.bestOdds.bestSpreadAwayOutcome.price : odds.bestOdds.bestSpreadAwayOutcome.price) : ''}">
-							    </span>
-							    <span th:if="${odds.bestOdds.bestSpreadAwayOutcome != null && odds.bestOdds.bestSpreadAwayBookmaker != null}">
-							        &nbsp;
-							    </span>
-							    <img th:if="${odds.bestOdds.bestSpreadAwayBookmaker != null}"
-							         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestSpreadAwayBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-							         th:title="${odds.bestOdds.bestSpreadAwayBookmaker.title}"
-							         th:alt="${odds.bestOdds.bestSpreadAwayBookmaker.title}"
-							         class="bookmaker-logo"
-							         style="vertical-align: middle; display: inline;">
-							</td>
-                            <!-- Existing bookmaker odds columns -->
-                            <td th:each="bookmaker : ${uniqueBookmakers}">
-                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
-                                    <div th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
-                                        <div th:if="${market.key == 'spreads'}">
-                                            <div th:each="outcome : ${market.outcomes}">
-                                                <div th:if="${outcome.name == odds.awayTeam}">
+                                        <!-- Away Team Odds -->
+                                        <div>
+                                            <span th:each="outcome : ${market.outcomes}">
+                                            	<span th:if="${outcome.name == odds.awayTeam}">
                                                     <span th:text="${outcome.point != null && outcome.point > 0 ? '+' + outcome.point : outcome.point}"
                                                           th:classappend="${outcome == odds.bestOdds.bestSpreadAwayOutcome} ? 'best-odds' : ''"></span>
-                                                    &nbsp;&nbsp;
+                                                    &nbsp;/&nbsp;
                                                     <span th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"
                                                           th:classappend="${outcome == odds.bestOdds.bestSpreadAwayOutcome} ? 'best-odds' : ''"></span>
-                                                </div>
-                                            </div>
+                                            	</span>
+                                            </span>
                                         </div>
                                     </div>
-                                </div>
-                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] == null}">
-                                    <p>No odds available</p>
                                 </div>
                             </td>
                         </tr>
@@ -260,4 +276,3 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
