@@ -21,7 +21,7 @@ public class OddsApiService {
 
     public String fetchOddsForSportAndMarket(String sportKey, String marketType) {
         String url = baseUrl + sportKey + "/odds/?apiKey="
-                + apiKey + "&regions=us&markets=" + marketType + "&oddsFormat=american";
+                + apiKey + "&regions=us,us2&markets=" + marketType + "&oddsFormat=american";
 
         try {
             // Create URL object and connect
