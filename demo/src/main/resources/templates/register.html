@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register</title>
+    <!-- Include Bootstrap CSS (optional) -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Register</h2>
+        <form th:action="@{/register}" th:object="${user}" method="post">
+            <!-- Username Field -->
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" th:field="*{username}" class="form-control" />
+                <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="text-danger"></span>
+            </div>
+            <!-- Password Field -->
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" th:field="*{password}" class="form-control" />
+                <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></span>
+            </div>
+            <!-- Registration Error -->
+            <div th:if="${registrationError}" class="alert alert-danger">
+                <p th:text="${registrationError}"></p>
+            </div>
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+        <p class="mt-3">Already have an account? <a th:href="@{/login}">Login here</a>.</p>
+    </div>
+    <!-- Include Bootstrap JS (optional) -->
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
