@@ -1,267 +1,35 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
-    <title>Spreads Odds - [[${sportName}]]</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-    <style>
-        body {
-            background-color: #1d1f21;
-            color: #c9c9c9;
-            margin: 0;
-            padding: 0;
-            padding-top: 56px; /* Adjust for navbar height */
-        }
-
-        /* Ensure the navbar stays fixed at the top */
-        .navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-        }
-
-        /* Main content layout with space for sidebar */
-        .main-content {
-            margin-left: 270px; /* Leave space for the sidebar */
-            padding: 20px;
-            width: calc(100% - 270px);
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 56px); /* Adjust for navbar height */
-        }
-
-        /* Table responsiveness and styling */
-        .table-responsive {
-            flex-grow: 1;
-            overflow-y: auto;
-            margin-top: 20px;
-        }
-
-        table {
-            width: auto !important; /* Ensures table doesn't stretch */
-            border-collapse: collapse;
-            font-family: Arial, sans-serif;
-            font-size: 12px; /* Reduced font size */
-        }
-
-        th, td {
-            padding: 3px; /* Reduced padding for smaller spacing */
-            margin: 0;
-            text-align: center;
-            vertical-align: middle;
-            border: 1px solid #3c3f41;
-            color: #ffffff;
-            white-space: nowrap;
-        }
-
-        /* Center the date in its cell */
-        .date-cell {
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        /* Make table header sticky */
-        thead th {
-            position: sticky;
-            top: 0;
-            background-color: #2a2c2e;
-            z-index: 2;
-            font-weight: bold;
-        }
-
-        /* Custom alternating row colors */
-        tbody tr:nth-child(2n) {
-            background-color: #1c2125;
-        }
-
-        tbody tr:nth-child(2n+1) {
-            background-color: #272a2e;
-        }
-
-        td:first-child {
-            text-align: left;
-            font-weight: bold;
-        }
-
-        /* Responsive styling for smaller screens */
-        @media (max-width: 768px) {
-            th, td {
-                font-size: 10px;
-                padding: 2px;
-            }
-
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
-
-            .sidebar {
-                width: 100%;
-                height: auto;
-            }
-        }
-
-        .bookmaker-logo {
-            width: 25px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-
-        /* Smaller logos in best odds column */
-        .best-odds-logo {
-            width: 20px;
-            height: auto;
-        }
-
-        /* Custom scrollbar styling */
-        .table-responsive::-webkit-scrollbar {
-            width: 12px;
-        }
-
-        .table-responsive::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .table-responsive::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-
-        .table-responsive::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Added classes for spacing */
-        .team-name, .odds-entry {
-            margin-bottom: 8px;
-        }
-
-        .odds-logo {
-            vertical-align: middle;
-            display: inline;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Login Page</title>
+  <!-- MDBootstrap CSS -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.css"
+    rel="stylesheet"
+  />
+  <!-- Font Awesome CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+  />
 </head>
 <body>
 
-    <!-- Insert Navbar Fragment with Parameters -->
-    <div th:insert="~{navbar :: navbar(sportKey=${sportKey}, marketType=${marketType})}" class="navbar"></div>
-
-    <!-- Insert Sidebar Fragment with Parameters -->
-    <div th:insert="~{sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}" class="sidebar"></div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <h1 class="my-4">Totals Odds - [[${sportName}]]</h1>
-
-        <!-- Table of Matchups and Totals Odds -->
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Matchup</th>
-                        <th>Best Totals</th> <!-- New column for best totals -->
-                        <th th:each="bookmaker : ${uniqueBookmakers}">
-                            <img th:src="@{/images/{logoImageName}.webp(logoImageName=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-                                 th:title="${bookmaker.title}"
-                                 th:alt="${bookmaker.title}"
-                                 class="bookmaker-logo">
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <th:block th:each="odds : ${oddsList}">
-                        <tr>
-                            <td th:text="${odds.formattedCommenceTime}"></td>
-                            <td>
-                                <div class="team-name">
-                                    <span th:text="${odds.homeTeam}"></span>
-                                </div>
-                                <div>
-                                    <span th:text="${odds.awayTeam}"></span>
-                                </div>
-                            </td>
-
-                            <!-- Best Totals Column -->
-                            <td>
-                                <!-- Home Team Best Odds -->
-                                <div class="odds-entry">
-                                    <span th:if="${odds.bestOdds.bestOverOutcome != null}"
-							          th:text="${odds.bestOdds.bestOverOutcome.point != null ? (odds.bestOdds.bestOverOutcome.point > 0 ? '+' + odds.bestOdds.bestOverOutcome.point : odds.bestOdds.bestOverOutcome.point) : ''}">
-								    </span>
-								    <span th:if="${odds.bestOdds.bestOverOutcome != null && odds.bestOdds.bestOverOutcome.point != null && odds.bestOdds.bestOverOutcome.price != null}">
-								        &nbsp;/&nbsp;
-								    </span>
-								    <span th:if="${odds.bestOdds.bestOverOutcome != null}"
-								          th:text="${odds.bestOdds.bestOverOutcome.price != null ? (odds.bestOdds.bestOverOutcome.price > 0 ? '+' + odds.bestOdds.bestOverOutcome.price : odds.bestOdds.bestOverOutcome.price) : ''}">
-								    </span>
-								    <span th:if="${odds.bestOdds.bestOverOutcome != null && odds.bestOdds.bestOverBookmaker != null}">
-								        &nbsp;
-								    </span>
-                                    <img th:if="${odds.bestOdds.bestOverBookmaker != null}"
-                                         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestOverBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-                                         th:title="${odds.bestOdds.bestOverBookmaker.title}"
-                                         th:alt="${odds.bestOdds.bestOverBookmaker.title}"
-                                         class="bookmaker-logo odds-logo best-odds-logo">
-                                </div>
-
-                                <!-- Away Team Best Odds -->
-                                <div>
-                                    <span th:if="${odds.bestOdds.bestUnderOutcome != null}"
-							          th:text="${odds.bestOdds.bestUnderOutcome.point != null ? (odds.bestOdds.bestUnderOutcome.point > 0 ? '+' + odds.bestOdds.bestUnderOutcome.point : odds.bestOdds.bestUnderOutcome.point) : ''}">
-								    </span>
-								    <span th:if="${odds.bestOdds.bestUnderOutcome != null && odds.bestOdds.bestUnderOutcome.point != null && odds.bestOdds.bestUnderOutcome.price != null}">
-								        &nbsp;/&nbsp;
-								    </span>
-								    <span th:if="${odds.bestOdds.bestUnderOutcome != null}"
-								          th:text="${odds.bestOdds.bestUnderOutcome.price != null ? (odds.bestOdds.bestUnderOutcome.price > 0 ? '+' + odds.bestOdds.bestUnderOutcome.price : odds.bestOdds.bestUnderOutcome.price) : ''}">
-								    </span>
-								    <span th:if="${odds.bestOdds.bestUnderOutcome != null && odds.bestOdds.bestUnderBookmaker != null}">
-								        &nbsp;
-								    </span>
-                                    <img th:if="${odds.bestOdds.bestUnderBookmaker != null}"
-                                         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestUnderBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-                                         th:title="${odds.bestOdds.bestUnderBookmaker.title}"
-                                         th:alt="${odds.bestOdds.bestUnderBookmaker.title}"
-                                         class="bookmaker-logo odds-logo best-odds-logo">
-                                </div>
-                            </td>
-                            <!-- Existing bookmaker odds columns -->
-                            <td th:each="bookmaker : ${uniqueBookmakers}">
-                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
-                                    <div th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}">
-                                        <div th:if="${market.key == 'totals'}">
-                                            <div th:each="outcome : ${market.outcomes}">
-                                                <div>
-                                                    <span th:text="${outcome.name}"
-                                                          th:classappend="${(outcome.name == 'Over' && outcome == odds.bestOdds.bestOverOutcome) || (outcome.name == 'Under' && outcome == odds.bestOdds.bestUnderOutcome) ? 'best-odds' : ''}"></span>
-                                                    &nbsp;
-                                                    <span th:text="${outcome.point}"
-                                                          th:classappend="${(outcome.name == 'Over' && outcome == odds.bestOdds.bestOverOutcome) || (outcome.name == 'Under' && outcome == odds.bestOdds.bestUnderOutcome) ? 'best-odds' : ''}"></span>
-                                                    <span th:if="${outcome.point != null && outcome.price != null}">
-                                                        &nbsp;/&nbsp;
-                                                    </span>
-                                                    <span th:text="${outcome.price > 0 ? '+' + outcome.price : outcome.price}"
-                                                          th:classappend="${(outcome.name == 'Over' && outcome == odds.bestOdds.bestOverOutcome) || (outcome.name == 'Under' && outcome == odds.bestOdds.bestUnderOutcome) ? 'best-odds' : ''}"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    </th:block>
-                </tbody>
-            </table>
-        </div>
+  <section class="vh-100" style="background-color: #9A616D;">
+    <div class="container py-5 h-100">
+      <!-- Your existing code -->
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <!-- ... rest of your code ... -->
+      </div>
     </div>
+  </section>
 
-    <!-- Bootstrap JS (optional) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- MDBootstrap JS -->
+  <script
+    type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.js"
+  ></script>
+
 </body>
 </html>
