@@ -28,12 +28,17 @@ public class RegistrationController {
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("user", new User());
-        return "register"; // Name of your Thymeleaf template
+        return "register";
     }
 
     @PostMapping("/register")
     public String registerUser(@Valid User user, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
+            return "register";
+        }
+        
+        if (!user.getPassword().equals(user.getConfirmPassword())) {
+            model.addAttribute("confirmPasswordError", "Passwords do not match.");
             return "register";
         }
 

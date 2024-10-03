@@ -43,6 +43,7 @@ public class WebSecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login")
                 .defaultSuccessUrl("/odds/americanfootball_nfl/h2h", true)
+                .failureUrl("/login?error=true") // Redirect to /login with error on failure
                 .permitAll()
             )
             // Configure logout
@@ -70,5 +71,3 @@ public class WebSecurityConfig {
         return authProvider;
     }
 }
-
-
