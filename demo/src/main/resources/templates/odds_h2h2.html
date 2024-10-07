@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>H2H Odds - [[${sportName}]]</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: #1d1f21;
+            color: #c9c9c9;
+            margin: 0;
+            padding: 0;
+            padding-top: 56px; /* Adjust for navbar height */
+        }
+
+        /* Ensure the navbar stays fixed at the top */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+        }
+
+        /* Main content layout with space for sidebar */
+        .main-content {
+            margin-left: 270px; /* Leave space for the sidebar */
+            padding: 20px;
+            width: calc(100% - 270px);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 56px); /* Adjust for navbar height */
+        }
+
+        /* Table responsiveness and styling */
+        .table-responsive {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: auto !important; /* Ensures table doesn't stretch */
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+            font-size: 12px; /* Reduced font size */
+        }
+
+        th, td {
+            padding: 3px; /* Reduced padding for smaller spacing */
+            margin: 0;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #3c3f41;
+            color: #ffffff;
+            white-space: nowrap;
+        }
+
+        /* Center the date in its cell */
+        .date-cell {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        /* Make table header sticky */
+        thead th {
+            position: sticky;
+            top: 0;
+            background-color: #2a2c2e;
+            z-index: 2;
+            font-weight: bold;
+        }
+
+        /* Custom alternating row colors */
+        tbody tr:nth-child(2n) {
+            background-color: #1c2125;
+        }
+
+        tbody tr:nth-child(2n+1) {
+            background-color: #272a2e;
+        }
+
+        td:first-child {
+            text-align: left;
+            font-weight: bold;
+        }
+
+        /* Responsive styling for smaller screens */
+        @media (max-width: 768px) {
+            th, td {
+                font-size: 10px;
+                padding: 2px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+        }
+
+        .bookmaker-logo {
+            width: 25px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Smaller logos in best odds column */
+        .best-odds-logo {
+            width: 20px;
+            height: auto;
+        }
+
+        /* Custom scrollbar styling */
+        .table-responsive::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Added classes for spacing */
+        .team-name, .odds-entry {
+            margin-bottom: 8px;
+        }
+
+        .odds-logo {
+            vertical-align: middle;
+            display: inline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Insert Navbar Fragment -->
+    <div th:insert="~{navbar :: navbar(sportKey=${sportKey}, marketType=${marketType})}" class="navbar"></div>
+
+    <!-- Insert Sidebar Fragment -->
+    <div th:insert="~{sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}" class="sidebar"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1 class="my-4">Moneyline Odds - [[${sportName}]]</h1>
+
+        <!-- Table of Matchups and H2H Odds -->
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Teams</th>
+                        <th>Best Odds</th>
+                        <th th:each="bookmaker : ${uniqueBookmakers}">
+                            <img th:src="@{/images/{logoImageName}.webp(logoImageName=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                 th:title="${bookmaker.title}"
+                                 th:alt="${bookmaker.title}"
+                                 class="bookmaker-logo">
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <th:block th:each="odds : ${oddsList}">
+                        <tr>
+                            <!-- Date Cell -->
+                            <td th:text="${odds.formattedCommenceTime}" class="date-cell"></td>
+
+                            <!-- Teams Cell with spacing -->
+                            <td>
+                                <div class="team-name">
+                                    <span th:text="${odds.homeTeam}"></span>
+                                </div>
+                                <div>
+                                    <span th:text="${odds.awayTeam}"></span>
+                                </div>
+                            </td>
+
+                            <!-- Best Odds Cell with smaller logos -->
+                            <td>
+                                <!-- Home Team Best Odds -->
+                                <div class="odds-entry">
+                                    <span th:text="${odds.bestOdds.bestH2HHomeOutcome != null ? (odds.bestOdds.bestH2HHomeOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HHomeOutcome.price : odds.bestOdds.bestH2HHomeOutcome.price) : 'N/A'}"></span>
+                                    <span th:if="${odds.bestOdds.bestH2HHomeBookmaker != null}">&nbsp;</span>
+                                    <img th:if="${odds.bestOdds.bestH2HHomeBookmaker != null}"
+                                         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HHomeBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                         th:title="${odds.bestOdds.bestH2HHomeBookmaker.title}"
+                                         th:alt="${odds.bestOdds.bestH2HHomeBookmaker.title}"
+                                         class="bookmaker-logo odds-logo best-odds-logo">
+                                </div>
+
+                                <!-- Away Team Best Odds -->
+                                <div>
+                                    <span th:text="${odds.bestOdds.bestH2HAwayOutcome != null ? (odds.bestOdds.bestH2HAwayOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HAwayOutcome.price : odds.bestOdds.bestH2HAwayOutcome.price) : 'N/A'}"></span>
+                                    <span th:if="${odds.bestOdds.bestH2HAwayBookmaker != null}">&nbsp;</span>
+                                    <img th:if="${odds.bestOdds.bestH2HAwayBookmaker != null}"
+                                         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HAwayBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                         th:title="${odds.bestOdds.bestH2HAwayBookmaker.title}"
+                                         th:alt="${odds.bestOdds.bestH2HAwayBookmaker.title}"
+                                         class="bookmaker-logo odds-logo best-odds-logo">
+                                </div>
+                            </td>
+
+                            <!-- Bookmaker Odds Cells -->
+                            <td th:each="bookmaker : ${uniqueBookmakers}">
+                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
+                                    <div th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}" th:if="${market.key == 'h2h'}">
+                                        <!-- Home Team Odds -->
+                                        <div class="odds-entry">
+                                            <span th:each="outcome : ${market.outcomes}">
+                                                <span th:if="${outcome.name == odds.homeTeam}"
+                                                      th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"
+                                                      th:classappend="${outcome == odds.bestOdds.bestH2HHomeOutcome} ? 'best-odds' : ''"></span>
+                                            </span>
+                                        </div>
+                                        <!-- Away Team Odds -->
+                                        <div>
+                                            <span th:each="outcome : ${market.outcomes}">
+                                                <span th:if="${outcome.name == odds.awayTeam}"
+                                                      th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"
+                                                      th:classappend="${outcome == odds.bestOdds.bestH2HAwayOutcome} ? 'best-odds' : ''"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] == null}">
+                                    <!-- No odds available, display nothing -->
+                                </div>
+                            </td>
+                        </tr>
+                    </th:block>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
