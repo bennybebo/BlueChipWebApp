@@ -8,20 +8,28 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <style>
-        /* Existing styles (partial from your provided file) */
-        body {
-            background-color: #1d1f21;
-            color: #c9c9c9;
-            margin: 0;
-            padding: 0;
-            padding-top: 56px; /* Adjust for navbar height */
-        }
+	        body {
+			    background: linear-gradient(to bottom right, #1d1f21, #2c3e50);
+			    color: #c9c9c9;
+			    margin: 0;
+			    padding: 0;
+			    padding-top: 56px; /* Adjust for navbar height */
+			}
+
 
         .navbar {
             position: fixed;
             top: 0;
             width: 100%;
+            background-color: #2e3b4e; /* Dark bluish-gray to match the theme */
+			border-bottom: 1px solid #4a5e72; /* Optional: A subtle border to create a division */
+			color: #ffffff; /* White text for contrast */
         }
+        .sidebar {
+    background-color: #37495b; /* Slightly lighter bluish-gray than the navbar */
+    color: #c9c9c9; /* Light gray text to keep the readability */
+    border-right: 1px solid #4a5e72; /* Optional: Adds a subtle division from the main content */
+}
 
         .main-content {
             margin-left: 270px;
@@ -166,7 +174,7 @@
 </head>
 <body>
     <!-- Insert Navbar Fragment -->
-    <div th:insert="~{navbar :: navbar(sportKey=${sportKey}, marketType=${marketType})}" class="navbar"></div>
+    <div th:replace="~{navbar :: navbar(sportKey=${sportKey}, marketType=${marketType})}" class="navbar"></div>
 
     <!-- Insert Sidebar Fragment -->
     <div th:insert="~{sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}" class="sidebar"></div>
