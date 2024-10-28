@@ -29,8 +29,8 @@ public class WebSecurityConfig {
                 // Allow access to these URLs without authentication
                 .requestMatchers(
                     "/", "/home", "/index", "/register", "/login",
-                    "/css/**", "/js/**", "/images/**", "/h2-console/**",
-                    "/public/**", "/webjars/**"
+                    "/css/**", "/js/**", "/images/**", "/assets/**", 
+                    "/h2-console/**", "/public/**", "/webjars/**"
                 ).permitAll()
                 // Require authentication for these URLs
                 .requestMatchers(
