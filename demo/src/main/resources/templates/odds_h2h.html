@@ -2,76 +2,76 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>H2H Odds - [[${sportName}]]</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- FontAwesome for icons -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <!-- Material Design Icons CSS -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <!-- Plugin CSS -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/jvectormap/jquery-jvectormap.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/flag-icon-css/css/flag-icon.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.theme.default.min.css}">
+    <!-- Layout styles -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <!-- Favicon -->
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <!-- Custom CSS -->
     <style>
-	        body {
-			    background: linear-gradient(to bottom right, #1d1f21, #2c3e50);
-			    color: #c9c9c9;
-			    margin: 0;
-			    padding: 0;
-			    padding-top: 56px; /* Adjust for navbar height */
-			}
-
-
-        .navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background-color: #2e3b4e; /* Dark bluish-gray to match the theme */
-			border-bottom: 1px solid #4a5e72; /* Optional: A subtle border to create a division */
-			color: #ffffff; /* White text for contrast */
+	    #navbarButtonUnique {
+		    position: relative;
+		    top: 20px; /* Adjust this value as needed */
+		    /* Additional styling for the unique navbar button */
+		}
+	    .sidebar {
+		    height: 100vh; /* Full viewport height */
+		    overflow-y: auto; /* Add scroll if content overflows */
+		}
+		.template-demo .btn {
+		    position: relative;
+		    top: -8px; /* Adjust this value as needed */
+		}
+        .body {
+            background: linear-gradient(to bottom right, #1d1f21, #2c3e50);
+            color: #c9c9c9;
+            margin: 0;
+            padding: 0;
+            /* Remove padding-top to prevent extra space */
         }
-        .sidebar {
-    background-color: #37495b; /* Slightly lighter bluish-gray than the navbar */
-    color: #c9c9c9; /* Light gray text to keep the readability */
-    border-right: 1px solid #4a5e72; /* Optional: Adds a subtle division from the main content */
-}
-
-        .main-content {
-            margin-left: 270px;
+        .main-panel {
+           
+            padding-top: 70px; /* Adjust for navbar height */
+            min-height: 100vh; /* Ensure the main panel covers full height */
+        }
+        .content-wrapper {
             padding: 20px;
-            width: calc(100% - 270px);
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 56px);
         }
-
         .table-container {
-		    flex-grow: 1;
-		    overflow: auto;
-		    margin-top: 20px;
-		    max-height: calc(100vh - 200px); /* Keeps the table within the viewport */
-		}
-		
-		/* Custom Scrollbar styling */
-		.table-container::-webkit-scrollbar {
-		    width: 10px; /* Width of the scrollbar */
-		    height: 10px; /* Height of the scrollbar for horizontal scrolling */
-		}
-		
-		.table-container::-webkit-scrollbar-track {
-		    background: #2c3e50; /* Track color */
-		}
-		
-		.table-container::-webkit-scrollbar-thumb {
-		    background-color: #2980b9; /* Scrollbar thumb color */
-		    border-radius: 10px; /* Rounded corners for the scrollbar thumb */
-		    border: 2px solid #2c3e50; /* Adds a border to match the panel's background */
-		}
-		
-		.table-container::-webkit-scrollbar-thumb:hover {
-		    background-color: #3498db; /* Lighter shade on hover */
-		}
-		
-		/* Style for the scrollbar corner */
-		.table-container::-webkit-scrollbar-corner {
-		    background: #2c3e50; /* Match this color to the theme of your table */
-		}
-
+            overflow: auto;
+            margin-top: 20px;
+            max-height: calc(100vh - 200px); /* Keeps the table within the viewport */
+        }
+        /* Custom Scrollbar styling */
+        .table-container::-webkit-scrollbar {
+            width: 10px; /* Width of the scrollbar */
+            height: 10px; /* Height of the scrollbar for horizontal scrolling */
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #2c3e50; /* Track color */
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: #2980b9; /* Scrollbar thumb color */
+            border-radius: 10px; /* Rounded corners for the scrollbar thumb */
+            border: 2px solid #2c3e50; /* Adds a border to match the panel's background */
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background-color: #3498db; /* Lighter shade on hover */
+        }
+        /* Style for the scrollbar corner */
+        .table-container::-webkit-scrollbar-corner {
+            background: #2c3e50; /* Match this color to the theme of your table */
+        }
         /* Panel and table styling remains the same */
         .panel {
             background: linear-gradient(to right, #2980b9, #2c3e50);
@@ -98,7 +98,7 @@
             margin: 0;
             white-space: nowrap;
         }
-        .panel .panel-heading .btn_group input{
+        .panel .panel-heading .btn_group input {
             color: #fff;
             background-color: transparent;
             width: 35%;
@@ -108,7 +108,7 @@
             display: inline-block;
             transition: all 0.3s ease 0s;
         }
-        .panel .panel-body .table thead tr th{
+        .panel .panel-body .table thead tr th {
             color: #fff;
             background-color: rgba(255, 255, 255, 0.2);
             font-size: 16px;
@@ -120,11 +120,10 @@
             top: 0;
             z-index: 3;
         }
-        
         .panel .panel-body .table thead tr th:nth-child(3) {
             white-space: nowrap; /* Ensure "Best Odds" header is on one line */
         }
-        .panel .panel-body .table tbody tr td{
+        .panel .panel-body .table tbody tr td {
             color: #fff;
             font-size: 15px;
             padding: 10px 12px;
@@ -132,32 +131,27 @@
             border: 1px solid #3c3f41; /* Added thin borders between rows and columns */
             white-space: nowrap; /* Prevent AM/PM from wrapping to a new line */
         }
-
         .bookmaker-logo {
             width: 25px;
             height: auto;
             display: block;
             margin: 0 auto;
         }
-
         /* Smaller logos in best odds column */
         .best-odds-logo {
             width: 20px;
             height: auto;
         }
-
         .odds-logo {
             vertical-align: middle;
             display: inline;
         }
-
         .best-odds-entry {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 5px; /* Add some space between the odds value and the logo */
         }
-
         .odds-value {
             display: inline-block;
             text-align: center;  /* Align text to center for consistency */
@@ -173,110 +167,153 @@
     </style>
 </head>
 <body>
-    <!-- Insert Navbar Fragment -->
-    <div th:replace="~{navbar :: navbar(sportKey=${sportKey}, marketType=${marketType})}" class="navbar"></div>
+    <div class="container-scroller">
+    	<div th:insert="~{sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
+        <div class="container-fluid page-body-wrapper">
+        	<div th:insert="~{navbar :: navbar(user=${user})}"></div>
+            <!-- Main Panel -->
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Main Content -->
+                    <div class="panel">
+                        <div class="panel-heading">
+					        <div class="d-flex align-items-center flex-wrap">
+					            <!-- Table Title -->
+					            <h1 class="title mb-0 mr-4 align-self-center">[[${sportName}]] Odds</h1>
+					            
+					            <!-- Buttons and Search -->
+					            <div class="d-flex align-items-center mt-2 mt-md-0 flex-wrap">
+					                <!-- Buttons -->
+					                <div class="template-demo mr-3 d-flex align-items-center">
+					                    <a class="btn btn-outline-light btn-fw" 
+					                       th:classappend="${marketType} == 'h2h' ? ' active'" 
+					                       th:href="@{'/odds/' + ${sportKey} + '/h2h'}">Moneyline</a>
+					                       
+					                    <a class="btn btn-outline-light btn-fw" 
+					                       th:classappend="${marketType} == 'spreads' ? ' active'" 
+					                       th:href="@{'/odds/' + ${sportKey} + '/spreads'}">Spreads</a>
+					                       
+					                    <a class="btn btn-outline-light btn-fw" 
+					                       th:classappend="${marketType} == 'totals' ? ' active'" 
+					                       th:href="@{'/odds/' + ${sportKey} + '/totals'}">Totals</a>
+					                </div>
+					                
+					                <!-- Search and Reload Button -->
+					                <div class="btn_group d-flex align-items-center">
+					                    <input type="text" id="tableSearch" class="form-control mr-2" placeholder="Search">
+					                    <button class="btn btn-default" title="Reload"><i class="fa fa-sync-alt"></i></button>
+					                </div>
+					            </div>
+					        </div>
+					    </div>
+                        <!-- Table of Matchups and H2H Odds -->
+                        <div class="panel-body table-container">
+                            <table class="table table-bordered" id="matchupsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Teams</th>
+                                        <th>Best Odds</th>
+                                        <th th:each="bookmaker : ${uniqueBookmakers}">
+                                            <img th:src="@{/images/{logoImageName}.webp(logoImageName=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                                 th:title="${bookmaker.title}"
+                                                 th:alt="${bookmaker.title}"
+                                                 class="bookmaker-logo">
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <th:block th:each="odds : ${oddsList}">
+                                        <tr>
+                                            <!-- Date Cell -->
+                                            <td th:text="${odds.formattedCommenceTime}" class="date-cell"></td>
 
-    <!-- Insert Sidebar Fragment -->
-    <div th:insert="~{sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}" class="sidebar"></div>
+                                            <!-- Teams Cell with spacing -->
+                                            <td>
+                                                <div class="team-name">
+                                                    <span th:text="${odds.homeTeam}"></span>
+                                                </div>
+                                                <div>
+                                                    <span th:text="${odds.awayTeam}"></span>
+                                                </div>
+                                            </td>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="panel">
-            <div class="panel-heading">
-                <h1 class="title">Moneyline Odds - [[${sportName}]]</h1>
-                <div class="btn_group">
-                    <input type="text" class="form-control" placeholder="Search">
-                    <button class="btn btn-default" title="Reload"><i class="fa fa-sync-alt"></i></button>
+                                            <!-- Best Odds Cell with smaller logos -->
+                                            <td>
+                                                <!-- Home Team Best Odds -->
+                                                <div class="best-odds-entry">
+                                                    <span class="odds-value" th:text="${odds.bestOdds.bestH2HHomeOutcome != null ? (odds.bestOdds.bestH2HHomeOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HHomeOutcome.price : odds.bestOdds.bestH2HHomeOutcome.price) : 'N/A'}"></span>
+                                                    <img th:if="${odds.bestOdds.bestH2HHomeBookmaker != null}"
+                                                         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HHomeBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                                         th:title="${odds.bestOdds.bestH2HHomeBookmaker.title}"
+                                                         th:alt="${odds.bestOdds.bestH2HHomeBookmaker.title}"
+                                                         class="bookmaker-logo odds-logo best-odds-logo">
+                                                </div>
+                                                <!-- Away Team Best Odds -->
+                                                <div class="best-odds-entry">
+                                                    <span class="odds-value" th:text="${odds.bestOdds.bestH2HAwayOutcome != null ? (odds.bestOdds.bestH2HAwayOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HAwayOutcome.price : odds.bestOdds.bestH2HAwayOutcome.price) : 'N/A'}"></span>
+                                                    <img th:if="${odds.bestOdds.bestH2HAwayBookmaker != null}"
+                                                         th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HAwayBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
+                                                         th:title="${odds.bestOdds.bestH2HAwayBookmaker.title}"
+                                                         th:alt="${odds.bestOdds.bestH2HAwayBookmaker.title}"
+                                                         class="bookmaker-logo odds-logo best-odds-logo">
+                                                </div>
+                                            </td>
+
+                                            <!-- Bookmaker Odds Cells -->
+                                            <td th:each="bookmaker : ${uniqueBookmakers}">
+                                                <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
+                                                    <div th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}" th:if="${market.key == 'h2h'}">
+                                                        <!-- Home Team Odds -->
+                                                        <div class="odds-entry">
+                                                            <span class="odds-value" th:each="outcome : ${market.outcomes}">
+                                                                <span th:if="${outcome.name == odds.homeTeam}"
+                                                                      th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"
+                                                                      th:classappend="${outcome == odds.bestOdds.bestH2HHomeOutcome} ? 'best-odds' : ''"></span>
+                                                            </span>
+                                                        </div>
+                                                        <!-- Away Team Odds -->
+                                                        <div class="odds-entry">
+                                                            <span class="odds-value" th:each="outcome : ${market.outcomes}">
+                                                                <span th:if="${outcome.name == odds.awayTeam}"
+                                                                      th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"
+                                                                      th:classappend="${outcome == odds.bestOdds.bestH2HAwayOutcome} ? 'best-odds' : ''"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </th:block>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- panel ends -->
                 </div>
+                <!-- content-wrapper ends -->
             </div>
-
-            <!-- Table of Matchups and H2H Odds -->
-            <div class="panel-body table-container">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Teams</th>
-                            <th>Best Odds</th>
-                            <th th:each="bookmaker : ${uniqueBookmakers}">
-                                <img th:src="@{/images/{logoImageName}.webp(logoImageName=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-                                     th:title="${bookmaker.title}"
-                                     th:alt="${bookmaker.title}"
-                                     class="bookmaker-logo">
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <th:block th:each="odds : ${oddsList}">
-                            <tr>
-                                <!-- Date Cell -->
-                                <td th:text="${odds.formattedCommenceTime}" class="date-cell"></td>
-
-                                <!-- Teams Cell with spacing -->
-                                <td>
-                                    <div class="team-name">
-                                        <span th:text="${odds.homeTeam}"></span>
-                                    </div>
-                                    <div>
-                                        <span th:text="${odds.awayTeam}"></span>
-                                    </div>
-                                </td>
-
-                                <!-- Best Odds Cell with smaller logos -->
-                                <td>
-                                    <!-- Home Team Best Odds -->
-                                    <div class="best-odds-entry">
-                                        <span class="odds-value" th:text="${odds.bestOdds.bestH2HHomeOutcome != null ? (odds.bestOdds.bestH2HHomeOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HHomeOutcome.price : odds.bestOdds.bestH2HHomeOutcome.price) : 'N/A'}"></span>
-                                        <img th:if="${odds.bestOdds.bestH2HHomeBookmaker != null}"
-                                             th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HHomeBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-                                             th:title="${odds.bestOdds.bestH2HHomeBookmaker.title}"
-                                             th:alt="${odds.bestOdds.bestH2HHomeBookmaker.title}"
-                                             class="bookmaker-logo odds-logo best-odds-logo">
-                                    </div>
-                                    <!-- Away Team Best Odds -->
-                                    <div class="best-odds-entry">
-                                        <span class="odds-value" th:text="${odds.bestOdds.bestH2HAwayOutcome != null ? (odds.bestOdds.bestH2HAwayOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HAwayOutcome.price : odds.bestOdds.bestH2HAwayOutcome.price) : 'N/A'}"></span>
-                                        <img th:if="${odds.bestOdds.bestH2HAwayBookmaker != null}"
-                                             th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HAwayBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-                                             th:title="${odds.bestOdds.bestH2HAwayBookmaker.title}"
-                                             th:alt="${odds.bestOdds.bestH2HAwayBookmaker.title}"
-                                             class="bookmaker-logo odds-logo best-odds-logo">
-                                    </div>
-                                </td>
-
-                                <!-- Bookmaker Odds Cells -->
-                                <td th:each="bookmaker : ${uniqueBookmakers}">
-                                    <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
-                                        <div th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}" th:if="${market.key == 'h2h'}">
-                                            <!-- Home Team Odds -->
-                                            <div class="odds-entry">
-                                                <span class="odds-value" th:each="outcome : ${market.outcomes}">
-                                                    <span th:if="${outcome.name == odds.homeTeam}"
-                                                          th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"
-                                                          th:classappend="${outcome == odds.bestOdds.bestH2HHomeOutcome} ? 'best-odds' : ''"></span>
-                                                </span>
-                                            </div>
-                                            <!-- Away Team Odds -->
-                                            <div class="odds-entry">
-                                                <span class="odds-value" th:each="outcome : ${market.outcomes}">
-                                                    <span th:if="${outcome.name == odds.awayTeam}"
-                                                          th:text="${outcome.price != null && outcome.price > 0 ? '+' + outcome.price : outcome.price}"
-                                                          th:classappend="${outcome == odds.bestOdds.bestH2HAwayOutcome} ? 'best-odds' : ''"></span>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </th:block>
-                    </tbody>
-                </table>
-            </div>
+            <!-- main-panel ends -->
         </div>
+        <!-- page-body-wrapper ends -->
     </div>
-
-    <!-- Bootstrap JS (optional) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- container-scroller ends -->
+    <!-- Vendor JS -->
+    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+    <!-- Plugin JS -->
+    <script th:src="@{/assets/vendors/chart.js/Chart.min.js}"></script>
+    <script th:src="@{/assets/vendors/progressbar.js/progressbar.min.js}"></script>
+    <script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap.min.js}"></script>
+    <script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js}"></script>
+    <script th:src="@{/assets/vendors/owl-carousel-2/owl.carousel.min.js}"></script>
+    <!-- Inject JS -->
+    <script th:src="@{/assets/js/off-canvas.js}"></script>
+    <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+    <script th:src="@{/assets/js/misc.js}"></script>
+    <script th:src="@{/assets/js/settings.js}"></script>
+    <script th:src="@{/assets/js/todolist.js}"></script>
+    <!-- Custom JS for this page -->
+    <script th:src="@{/assets/js/dashboard.js}"></script>
+    <script th:src="@{/js/tableSearch.js}"></script>
 </body>
 </html>
