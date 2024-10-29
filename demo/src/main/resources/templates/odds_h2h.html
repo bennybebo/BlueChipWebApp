@@ -168,44 +168,63 @@
 </head>
 <body>
     <div class="container-scroller">
-    	<div th:insert="~{sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
+    	<div th:insert="~{partials/sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
         <div class="container-fluid page-body-wrapper">
-        	<div th:insert="~{navbar :: navbar(user=${user})}"></div>
+        	<div th:insert="~{partials/navbar :: navbar(user=${user})}"></div>
             <!-- Main Panel -->
             <div class="main-panel">
                 <div class="content-wrapper">
                     <!-- Main Content -->
                     <div class="panel">
                         <div class="panel-heading">
-					        <div class="d-flex align-items-center flex-wrap">
-					            <!-- Table Title -->
-					            <h1 class="title mb-0 mr-4 align-self-center">[[${sportName}]] Odds</h1>
-					            
-					            <!-- Buttons and Search -->
-					            <div class="d-flex align-items-center mt-2 mt-md-0 flex-wrap">
-					                <!-- Buttons -->
-					                <div class="template-demo mr-3 d-flex align-items-center">
-					                    <a class="btn btn-outline-light btn-fw" 
-					                       th:classappend="${marketType} == 'h2h' ? ' active'" 
-					                       th:href="@{'/odds/' + ${sportKey} + '/h2h'}">Moneyline</a>
-					                       
-					                    <a class="btn btn-outline-light btn-fw" 
-					                       th:classappend="${marketType} == 'spreads' ? ' active'" 
-					                       th:href="@{'/odds/' + ${sportKey} + '/spreads'}">Spreads</a>
-					                       
-					                    <a class="btn btn-outline-light btn-fw" 
-					                       th:classappend="${marketType} == 'totals' ? ' active'" 
-					                       th:href="@{'/odds/' + ${sportKey} + '/totals'}">Totals</a>
-					                </div>
-					                
-					                <!-- Search and Reload Button -->
-					                <div class="btn_group d-flex align-items-center">
-					                    <input type="text" id="tableSearch" class="form-control mr-2" placeholder="Search">
-					                    <button class="btn btn-default" title="Reload"><i class="fa fa-sync-alt"></i></button>
-					                </div>
-					            </div>
-					        </div>
-					    </div>
+					        <div class="d-flex align-items-center flex-nowrap w-100">
+						    <!-- Table Title -->
+						    <h1 class="title mb-0 mr-4 align-self-center">[[${sportName}]] Odds</h1>
+						    
+						    <!-- Button and Search Section -->
+						    <div class="d-flex align-items-center mt-2 mt-md-0 flex-grow-1">
+						        <!-- Fixed-width Button Group -->
+						        <div class="template-demo d-flex align-items-center flex-nowrap mr-3" style="flex-shrink: 0;">
+						            <a class="btn btn-outline-light btn-fw" 
+						               th:classappend="${marketType} == 'h2h' ? ' active'" 
+						               th:href="@{'/odds/' + ${sportKey} + '/h2h'}">Moneyline</a>
+						               
+						            <a class="btn btn-outline-light btn-fw" 
+						               th:classappend="${marketType} == 'spreads' ? ' active'" 
+						               th:href="@{'/odds/' + ${sportKey} + '/spreads'}">Spreads</a>
+						               
+						            <a class="btn btn-outline-light btn-fw" 
+						               th:classappend="${marketType} == 'totals' ? ' active'" 
+						               th:href="@{'/odds/' + ${sportKey} + '/totals'}">Totals</a>
+						        </div>
+						        
+						        <!-- Search Input -->
+						        <div class="btn_group d-flex align-items-center mr-3" style="flex-shrink: 0;">
+						            <input type="text" id="tableSearch" class="form-control" placeholder="Search">
+						        </div>
+					
+						        <!-- Expandable Select Sportsbooks Button -->
+						        <div class="flex-grow-1" id="sportsbookDropdownContainer">
+						            <div class="dropdown w-100">
+						                <button class="btn btn-outline-light btn-fw dropdown-toggle w-100" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						                    Select Sportsbooks
+						                </button>
+						                <div class="dropdown-menu w-100" style="max-height: 300px; overflow-y: auto;">
+						                    <h6 class="dropdown-header">Available Sportsbooks</h6>
+						                    <div class="bookmaker-checkboxes d-flex flex-wrap">
+						                        <div th:each="bookmaker : ${uniqueBookmakers}" class="mr-2">
+						                            <label>
+						                                <input type="checkbox" class="bookmaker-checkbox" 
+						                                       th:attr="data-bookmaker=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')}" checked>
+						                                <span th:text="${bookmaker.title}"></span>
+						                            </label>
+						                        </div>
+						                    </div>
+						                </div>
+						            </div>
+						        </div>
+						    </div>
+						</div>
                         <!-- Table of Matchups and H2H Odds -->
                         <div class="panel-body table-container">
                             <table class="table table-bordered" id="matchupsTable">
@@ -214,7 +233,7 @@
                                         <th>Date</th>
                                         <th>Teams</th>
                                         <th>Best Odds</th>
-                                        <th th:each="bookmaker : ${uniqueBookmakers}">
+                                        <th th:each="bookmaker : ${uniqueBookmakers}" th:attr="data-bookmaker=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')}">
                                             <img th:src="@{/images/{logoImageName}.webp(logoImageName=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
                                                  th:title="${bookmaker.title}"
                                                  th:alt="${bookmaker.title}"
@@ -261,7 +280,7 @@
                                             </td>
 
                                             <!-- Bookmaker Odds Cells -->
-                                            <td th:each="bookmaker : ${uniqueBookmakers}">
+                                            <td th:each="bookmaker : ${uniqueBookmakers}" th:attr="data-bookmaker=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')}">
                                                 <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
                                                     <div th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}" th:if="${market.key == 'h2h'}">
                                                         <!-- Home Team Odds -->
@@ -297,6 +316,7 @@
         </div>
         <!-- page-body-wrapper ends -->
     </div>
+</div>
     <!-- container-scroller ends -->
     <!-- Vendor JS -->
     <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
@@ -315,5 +335,6 @@
     <!-- Custom JS for this page -->
     <script th:src="@{/assets/js/dashboard.js}"></script>
     <script th:src="@{/js/tableSearch.js}"></script>
+    <script th:src="@{/js/bookmakerFilter.js}"></script>
 </body>
 </html>

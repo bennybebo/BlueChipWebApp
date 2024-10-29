@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <!-- Material Design Icons CSS -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <!-- Plugin CSS -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/jvectormap/jquery-jvectormap.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/flag-icon-css/css/flag-icon.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.theme.default.min.css}">
+    <!-- Layout styles -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <!-- Favicon -->
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <!-- Custom CSS -->
+    <style>
+	    #navbarButtonUnique {
+		    position: relative;
+		    top: 20px; /* Adjust this value as needed */
+		    /* Additional styling for the unique navbar button */
+		}
+	    .sidebar {
+		    height: 100vh; /* Full viewport height */
+		    overflow-y: auto; /* Add scroll if content overflows */
+		}
+		.template-demo .btn {
+		    position: relative;
+		    top: -8px; /* Adjust this value as needed */
+		}
+        .body {
+            background: linear-gradient(to bottom right, #1d1f21, #2c3e50);
+            color: #c9c9c9;
+            margin: 0;
+            padding: 0;
+            /* Remove padding-top to prevent extra space */
+        }
+        .main-panel {
+           
+            padding-top: 70px; /* Adjust for navbar height */
+            min-height: 100vh; /* Ensure the main panel covers full height */
+        }
+        .content-wrapper {
+            padding: 20px;
+        }
+        .table-container {
+            overflow: auto;
+            margin-top: 20px;
+            max-height: calc(100vh - 200px); /* Keeps the table within the viewport */
+        }
+        /* Custom Scrollbar styling */
+        .table-container::-webkit-scrollbar {
+            width: 10px; /* Width of the scrollbar */
+            height: 10px; /* Height of the scrollbar for horizontal scrolling */
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #2c3e50; /* Track color */
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: #2980b9; /* Scrollbar thumb color */
+            border-radius: 10px; /* Rounded corners for the scrollbar thumb */
+            border: 2px solid #2c3e50; /* Adds a border to match the panel's background */
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background-color: #3498db; /* Lighter shade on hover */
+        }
+        /* Style for the scrollbar corner */
+        .table-container::-webkit-scrollbar-corner {
+            background: #2c3e50; /* Match this color to the theme of your table */
+        }
+        /* Panel and table styling remains the same */
+        .panel {
+            background: linear-gradient(to right, #2980b9, #2c3e50);
+            padding: 0;
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 0 0 5px rgba(0,0,0,0.05),0 0 0 10px rgba(0,0,0,0.05);
+        }
+        .panel .panel-heading {
+            padding: 20px 15px;
+            border-radius: 10px 10px 0 0;
+            margin: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .panel .panel-heading .title {
+            color: #fff;
+            font-size: 28px;
+            font-weight: 500;
+            text-transform: capitalize;
+            line-height: 40px;
+            margin: 0;
+            white-space: nowrap;
+        }
+        .panel .panel-heading .btn_group input {
+            color: #fff;
+            background-color: transparent;
+            width: 35%;
+            height: 40px;
+            border: 2px solid #fff;
+            border-radius: 20px;
+            display: inline-block;
+            transition: all 0.3s ease 0s;
+        }
+        .panel .panel-body .table thead tr th {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.2);
+            font-size: 16px;
+            font-weight: 500;
+            text-transform: uppercase;
+            padding: 12px;
+            border: 1px solid #3c3f41; /* Added thin borders between rows and columns */
+            position: sticky;
+            top: 0;
+            z-index: 3;
+        }
+        .panel .panel-body .table thead tr th:nth-child(3) {
+            white-space: nowrap; /* Ensure "Best Odds" header is on one line */
+        }
+        .panel .panel-body .table tbody tr td {
+            color: #fff;
+            font-size: 15px;
+            padding: 10px 12px;
+            vertical-align: middle;
+            border: 1px solid #3c3f41; /* Added thin borders between rows and columns */
+            white-space: nowrap; /* Prevent AM/PM from wrapping to a new line */
+        }
+        .bookmaker-logo {
+            width: 25px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        /* Smaller logos in best odds column */
+        .best-odds-logo {
+            width: 20px;
+            height: auto;
+        }
+        .odds-logo {
+            vertical-align: middle;
+            display: inline;
+        }
+        .best-odds-entry {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px; /* Add some space between the odds value and the logo */
+        }
+        .odds-value {
+            display: inline-block;
+            text-align: center;  /* Align text to center for consistency */
+            width: 40px;        /* Fixed width for all odds values */
+        }
+        .odds-entry {
+            display: flex;
+            align-items: center;  /* Center vertically */
+            justify-content: center;  /* Center horizontally */
+            text-align: center;  /* Ensure both odds value and logo are centered */
+            flex-direction: column; /* Align odds and logos in a vertical column */
+        }
+    </style>
+</head>
+<body>
+    <div class="container-scroller">
+    	<div th:insert="~{partials/sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
+        <div class="container-fluid page-body-wrapper">
+        	<div th:insert="~{partials/navbar :: navbar(user=${user})}"></div>
+            <!-- Main Panel -->
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Main Content -->
+                    <div class="row">
+					    <!-- Weekly Returns Card -->
+					    <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+					        <div class="card">
+					            <div class="card-body">
+					                <div class="row">
+					                    <div class="col-9">
+					                        <div class="d-flex align-items-center align-self-start">
+					                            <h3 class="mb-0">$45.67</h3>
+					                            <p class="text-success ml-2 mb-0 font-weight-medium">+5.2%</p>
+					                        </div>
+					                    </div>
+					                    <div class="col-3">
+					                        <div class="icon icon-box-success">
+					                            <span class="mdi mdi-arrow-top-right icon-item"></span>
+					                        </div>
+					                    </div>
+					                </div>
+					                <h6 class="text-muted font-weight-normal">Weekly Returns</h6>
+					            </div>
+					        </div>
+					    </div>
+					    
+					    <!-- Monthly Returns Card -->
+					    <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+					        <div class="card">
+					            <div class="card-body">
+					                <div class="row">
+					                    <div class="col-9">
+					                        <div class="d-flex align-items-center align-self-start">
+					                            <h3 class="mb-0">$189.34</h3>
+					                            <p class="text-success ml-2 mb-0 font-weight-medium">+12.3%</p>
+					                        </div>
+					                    </div>
+					                    <div class="col-3">
+					                        <div class="icon icon-box-success">
+					                            <span class="mdi mdi-arrow-top-right icon-item"></span>
+					                        </div>
+					                    </div>
+					                </div>
+					                <h6 class="text-muted font-weight-normal">Monthly Returns</h6>
+					            </div>
+					        </div>
+					    </div>
+					    
+					    <!-- Year-to-Date (YTD) Returns Card -->
+					    <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+					        <div class="card">
+					            <div class="card-body">
+					                <div class="row">
+					                    <div class="col-9">
+					                        <div class="d-flex align-items-center align-self-start">
+					                            <h3 class="mb-0">$823.45</h3>
+					                            <p class="text-success ml-2 mb-0 font-weight-medium">+8.7%</p>
+					                        </div>
+					                    </div>
+					                    <div class="col-3">
+					                        <div class="icon icon-box-success">
+					                            <span class="mdi mdi-arrow-top-right icon-item"></span>
+					                        </div>
+					                    </div>
+					                </div>
+					                <h6 class="text-muted font-weight-normal">Year-to-Date Returns</h6>
+					            </div>
+					        </div>
+					    </div>
+					    
+					    <!-- All-Time Returns Card -->
+					    <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+					        <div class="card">
+					            <div class="card-body">
+					                <div class="row">
+					                    <div class="col-9">
+					                        <div class="d-flex align-items-center align-self-start">
+					                            <h3 class="mb-0">$1,234.56</h3>
+					                            <p class="text-danger ml-2 mb-0 font-weight-medium">-1.4%</p>
+					                        </div>
+					                    </div>
+					                    <div class="col-3">
+					                        <div class="icon icon-box-danger">
+					                            <span class="mdi mdi-arrow-bottom-left icon-item"></span>
+					                        </div>
+					                    </div>
+					                </div>
+					                <h6 class="text-muted font-weight-normal">All-Time Returns</h6>
+					            </div>
+					        </div>
+					    </div>
+					</div>
+					<div class="row">
+					  <div class="col-12 grid-margin">
+					    <div class="card">
+					      <div class="card-body">
+					        <h4 class="card-title">Active Bets</h4>
+					        <div class="table-responsive">
+					          <table class="table">
+					            <thead>
+					              <tr>
+					                <th>
+					                  <div class="form-check form-check-muted m-0">
+					                    <label class="form-check-label">
+					                      <input type="checkbox" class="form-check-input">
+					                    </label>
+					                  </div>
+					                </th>
+					                <th> Bet </th>
+					                <th> Bet ID </th>
+					                <th> Amount Wagered </th>
+					                <th> Odds </th>
+					                <th> Sportsbook </th>
+					                <th> Date </th>
+					                <th> Bet Status </th>
+					              </tr>
+					            </thead>
+					            <tbody>
+					              <tr>
+					                <td>
+					                  <div class="form-check form-check-muted m-0">
+					                    <label class="form-check-label">
+					                      <input type="checkbox" class="form-check-input">
+					                    </label>
+					                  </div>
+					                </td>
+					                <td>
+					                  <span class="pl-2">Chiefs vs. Eagles</span>
+					                </td>
+					                <td> 34567 </td>
+					                <td> $1,000 </td>
+					                <td> +150 </td>
+					                <td> BetMGM </td>
+					                <td> 20 Oct 2024 </td>
+					                <td>
+					                  <div class="badge badge-outline-warning">Pending</div>
+					                </td>
+					              </tr>
+					              <tr>
+					                <td>
+					                  <div class="form-check form-check-muted m-0">
+					                    <label class="form-check-label">
+					                      <input type="checkbox" class="form-check-input">
+					                    </label>
+					                  </div>
+					                </td>
+					                <td>
+					                  <span class="pl-2">Lakers vs. Warriors</span>
+					                </td>
+					                <td> 45678 </td>
+					                <td> $500 </td>
+					                <td> -110 </td>
+					                <td> DraftKings </td>
+					                <td> 18 Oct 2024 </td>
+					                <td>
+					                  <div class="badge badge-outline-success">Won</div>
+					                </td>
+					              </tr>
+					              <tr>
+					                <td>
+					                  <div class="form-check form-check-muted m-0">
+					                    <label class="form-check-label">
+					                      <input type="checkbox" class="form-check-input">
+					                    </label>
+					                  </div>
+					                </td>
+					                <td>
+					                  <span class="pl-2">Patriots vs. Jets</span>
+					                </td>
+					                <td> 56789 </td>
+					                <td> $750 </td>
+					                <td> +200 </td>
+					                <td> FanDuel </td>
+					                <td> 15 Oct 2024 </td>
+					                <td>
+					                  <div class="badge badge-outline-danger">Lost</div>
+					                </td>
+					              </tr>
+					              <tr>
+					                <td>
+					                  <div class="form-check form-check-muted m-0">
+					                    <label class="form-check-label">
+					                      <input type="checkbox" class="form-check-input">
+					                    </label>
+					                  </div>
+					                </td>
+					                <td>
+					                  <span class="pl-2">Heat vs. Celtics</span>
+					                </td>
+					                <td> 67890 </td>
+					                <td> $300 </td>
+					                <td> +250 </td>
+					                <td> Caesars </td>
+					                <td> 12 Oct 2024 </td>
+					                <td>
+					                  <div class="badge badge-outline-warning">Pending</div>
+					                </td>
+					              </tr>
+					              <tr>
+					                <td>
+					                  <div class="form-check form-check-muted m-0">
+					                    <label class="form-check-label">
+					                      <input type="checkbox" class="form-check-input">
+					                    </label>
+					                  </div>
+					                </td>
+					                <td>
+					                  <span class="pl-2">Giants vs. Cowboys</span>
+					                </td>
+					                <td> 78901 </td>
+					                <td> $1,250 </td>
+					                <td> -130 </td>
+					                <td> BetRivers </td>
+					                <td> 10 Oct 2024 </td>
+					                <td>
+					                  <div class="badge badge-outline-success">Won</div>
+					                </td>
+					              </tr>
+					            </tbody>
+					          </table>
+					        </div>
+					      </div>
+					    </div>
+					  </div>
+					</div>
+                    <!-- panel ends -->
+                </div>
+                <!-- content-wrapper ends -->
+            </div>
+            <!-- main-panel ends -->
+        </div>
+        <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller ends -->
+    <!-- Vendor JS -->
+    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+    <!-- Plugin JS -->
+    <script th:src="@{/assets/vendors/chart.js/Chart.min.js}"></script>
+    <script th:src="@{/assets/vendors/progressbar.js/progressbar.min.js}"></script>
+    <script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap.min.js}"></script>
+    <script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js}"></script>
+    <script th:src="@{/assets/vendors/owl-carousel-2/owl.carousel.min.js}"></script>
+    <!-- Inject JS -->
+    <script th:src="@{/assets/js/off-canvas.js}"></script>
+    <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+    <script th:src="@{/assets/js/misc.js}"></script>
+    <script th:src="@{/assets/js/settings.js}"></script>
+    <script th:src="@{/assets/js/todolist.js}"></script>
+    <!-- Custom JS for this page -->
+    <script th:src="@{/assets/js/dashboard.js}"></script>
+</body>
+</html>
