@@ -168,9 +168,9 @@
 </head>
 <body>
     <div class="container-scroller">
-    	<div th:insert="~{sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
+    	<div th:insert="~{partials/sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
         <div class="container-fluid page-body-wrapper">
-        	<div th:insert="~{navbar :: navbar(user=${user})}"></div>
+        	<div th:insert="~{partials/navbar :: navbar(user=${user})}"></div>
             <!-- Main Panel -->
             <div class="main-panel">
                 <div class="content-wrapper">
