@@ -89,13 +89,24 @@
       </a>
     </li>
     <li class="nav-item menu-items">
-      <a class="nav-link" th:href="@{/pages/icons/mdi}">
-        <span class="menu-icon">
-          <i class="mdi mdi-contacts"></i>
-        </span>
-        <span class="menu-title">Icons</span>
-      </a>
-    </li>
+	  <a class="nav-link" data-toggle="collapse" href="#betting-calculators" aria-expanded="false" aria-controls="betting-calculators">
+	    <span class="menu-icon">
+	      <i class="mdi mdi-calculator"></i>
+	    </span>
+	    <span class="menu-title">Betting Calculators</span>
+	    <i class="menu-arrow"></i>
+	  </a>
+	  <div class="collapse" id="betting-calculators">
+	    <ul class="nav flex-column sub-menu">
+	      <li class="nav-item"> 
+	        <a class="nav-link" th:href="@{/calculators/arbitrage}">Arbitrage Calculator</a>
+	      </li>
+	      <li class="nav-item"> 
+	        <a class="nav-link" th:href="@{/calculators/kelly}">Kelly Calculator</a>
+	      </li>
+	    </ul>
+	  </div>
+	</li>
     <!-- User Pages Menu Item with Submenu -->
     <li class="nav-item menu-items">
       <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">

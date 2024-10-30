@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <!-- Material Design Icons CSS -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <!-- Layout styles -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <!-- Favicon -->
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <style>
+    	#navbarButtonUnique {
+		    position: relative;
+		    top: 20px; /* Adjust this value as needed */
+		    /* Additional styling for the unique navbar button */
+		}
+	    .sidebar {
+		    height: 100vh; /* Full viewport height */
+		    overflow-y: auto; /* Add scroll if content overflows */
+		}
+        /* Page Background */
+        .body {
+            background: linear-gradient(to bottom right, #1d1f21, #2c3e50);
+            color: #c9c9c9;
+            margin: 0;
+            padding: 0;
+        }
+        .main-panel {
+            padding-top: 70px; /* Adjust for navbar height */
+            min-height: 100vh; /* Ensure the main panel covers full height */
+        }
+        .content-wrapper {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-scroller">
+        <!-- Sidebar -->
+        <div th:insert="~{partials/sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
+
+        <div class="container-fluid page-body-wrapper">
+            <!-- Navbar -->
+            <div th:insert="~{partials/navbar :: navbar(user=${user})}"></div>
+
+            <!-- Main Panel -->
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Content for Arbitrage Calculator goes here -->
+                </div>
+                <!-- content-wrapper ends -->
+            </div>
+            <!-- main-panel ends -->
+        </div>
+        <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller ends -->
+
+    <!-- Vendor JS -->
+    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+    <!-- Inject JS -->
+    <script th:src="@{/assets/js/off-canvas.js}"></script>
+    <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+    <script th:src="@{/assets/js/misc.js}"></script>
+    <script th:src="@{/assets/js/settings.js}"></script>
+</body>
+</html>
