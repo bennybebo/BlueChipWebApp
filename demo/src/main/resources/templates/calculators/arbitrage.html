@@ -50,7 +50,87 @@
             <div class="main-panel">
                 <div class="content-wrapper">
                     <!-- Content for Arbitrage Calculator goes here -->
+                    <div class="col-md-6 mx-auto grid-margin stretch-card">
+					    <div class="card">
+					        <div class="card-body">
+					            <h4 class="card-title text-center">Arbitrage Calculator</h4>
+					            <form id="arbitrageForm">
+					                <!-- Row 1: Odds -->
+					                <div class="form-group">
+					                    <label>Odds</label>
+					                    <div class="input-group">
+					                        <input type="number" class="form-control" id="odds1" name="odds1" placeholder="+110" aria-label="Odds for Bet 1" oninput="calculateArbitrage()" required>
+					                        <input type="number" class="form-control" id="odds2" name="odds2" placeholder="+110" aria-label="Odds for Bet 2" oninput="calculateArbitrage()" required>
+					                    </div>
+					                </div>
+					
+					                <!-- Row 2: Stake -->
+					                <div class="form-group">
+					                    <label>Stake</label>
+					                    <div class="input-group">
+					                        <input type="number" class="form-control" id="stake1" name="stake1" placeholder="100" aria-label="Stake for Bet 1" oninput="calculateArbitrage()" required>
+					                        <input type="number" class="form-control" id="stake2" name="stake2" placeholder="100" aria-label="Stake for Bet 2" oninput="calculateArbitrage()" required>
+					                    </div>
+					                </div>
+					
+					                <!-- Row 3: Payout (no background) -->
+					                <div class="form-group">
+					                    <label>Payout</label>
+					                    <div class="input-group">
+					                        <input type="text" class="form-control" id="payout1" name="payout1" placeholder="0.00" aria-label="Payout for Bet 1">
+					                        <input type="text" class="form-control" id="payout2" name="payout2" placeholder="0.00" aria-label="Payout for Bet 2">
+					                    </div>
+					                </div>
+					
+					                <!-- Row 4: Headers for Results -->
+					                <div class="form-group">
+									    <div class="row text-center">
+									        <div class="col">
+									            <span class="font-weight-bold">Total Stake</span>
+									        </div>
+									        <div class="col">
+									            <span class="font-weight-bold">Total Payout</span>
+									        </div>
+									        <div class="col">
+									            <span class="font-weight-bold">Profit (<span id="profitPercentage">0.00%</span>)</span>
+									        </div>
+									    </div>
+									    <div class="row mt-2">
+									        <div class="col">
+									            <input type="text" class="form-control text-center bg-transparent border-0" id="totalStake" name="totalStake" placeholder="$0.00" aria-label="Total Stake" readonly>
+									        </div>
+									        <div class="col">
+									            <input type="text" class="form-control text-center bg-transparent border-0" id="totalPayout" name="totalPayout" placeholder="$0.00" aria-label="Total Payout" readonly>
+									        </div>
+									        <div class="col">
+									            <input type="text" class="form-control text-center bg-transparent border-0" id="profit" name="profit" placeholder="$0.00" aria-label="Profit" readonly>
+									        </div>
+									    </div>
+									</div>
+					            </form>
+					        </div>
+					    </div>
+					</div>
                 </div>
+                <div class="card">
+				  <div class="card-body">
+				    <h4 class="card-title">Arbitrage Betting Explained</h4>
+				    <p class="card-description">Understanding Arbitrage and Using the Calculator</p>
+				    <p>
+				      Arbitrage betting is a strategy that involves placing bets on all possible outcomes of an event across different bookmakers to guarantee a profit, regardless of the result. This is possible when bookmakers have differing opinions on the probabilities of outcomes, leading to discrepancies in the odds they offer. By exploiting these differences, bettors can secure a risk-free profit.
+				
+				      <br><br>
+				
+				      <strong>How to Use the Arbitrage Calculator:</strong>
+				      <ol>
+				        <li><strong>Enter the Odds:</strong> Input the odds from two different bookmakers into the "Odds" fields for Bet 1 and Bet 2.</li>
+				        <li><strong>Enter the Stake:</strong> Input your desired stake amount for one of the bets in the "Stake" field.</li>
+				        <li><strong>Automatic Calculations:</strong> The calculator will automatically compute the required stake for the other bet to achieve equal payouts. It will also display the potential payouts, total stake, total payout, and profit percentage.</li>
+				        <li><strong>Place Your Bets:</strong> Use the calculated stakes to place your bets with the respective bookmakers, ensuring you lock in a profit regardless of the event's outcome.</li>
+				      </ol>
+				    </p>
+				  </div>
+				</div>
                 <!-- content-wrapper ends -->
             </div>
             <!-- main-panel ends -->
@@ -66,5 +146,6 @@
     <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
     <script th:src="@{/assets/js/misc.js}"></script>
     <script th:src="@{/assets/js/settings.js}"></script>
+    <script th:src="@{/js/arbitrageCalculator.js}"></script>
 </body>
 </html>
