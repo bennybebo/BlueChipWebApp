@@ -41,6 +41,10 @@ public class User {
     @Getter @Setter
     private Instant createdAt;
 
+    @Transient
+    @Getter @Setter
+    private String confirmPassword;
+
     @PrePersist
     void prePersist() {
         if (createdAt == null) createdAt = Instant.now();

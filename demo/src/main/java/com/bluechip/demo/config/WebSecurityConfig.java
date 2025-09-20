@@ -24,7 +24,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for H2 console access (remove in production)
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
             .authorizeHttpRequests(authz -> authz
                 // Allow access to these URLs without authentication
                 .requestMatchers(
@@ -34,7 +34,7 @@ public class WebSecurityConfig {
                 ).permitAll()
                 // Require authentication for these URLs
                 .requestMatchers(
-                    "/updateBookmakers", "/user/**", "/preferences/**", "/secure/**"
+                    "/settings/**", "/updateBookmakers", "/user/**", "/preferences/**", "/secure/**"
                 ).authenticated()
                 // Any other request is permitted
                 .anyRequest().permitAll()
