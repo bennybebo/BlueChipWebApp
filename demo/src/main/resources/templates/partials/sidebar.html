@@ -60,9 +60,11 @@
         </div>
       </div>
     </li>
+
     <li class="nav-item nav-category">
       <span class="nav-link">Navigation</span>
     </li>
+
     <!-- Dashboard Menu Item -->
     <li class="nav-item menu-items">
       <a class="nav-link" th:href="@{/dashboard}">
@@ -72,6 +74,7 @@
         <span class="menu-title">Dashboard</span>
       </a>
     </li>
+
     <li class="nav-item menu-items">
       <a class="nav-link" th:href="@{/odds/americanfootball_nfl/h2h}">
         <span class="menu-icon">
@@ -80,6 +83,17 @@
         <span class="menu-title">Sportsbook Screen</span>
       </a>
     </li>
+
+    <!-- Plus-EV Picks (new) -->
+    <li class="nav-item menu-items">
+      <a class="nav-link" th:href="@{/plus-ev}">
+        <span class="menu-icon">
+          <i class="mdi mdi-currency-usd"></i>
+        </span>
+        <span class="menu-title">Plus-EV Picks</span>
+      </a>
+    </li>
+
     <li class="nav-item menu-items">
       <a class="nav-link" th:href="@{/pages/charts/chartjs}">
         <span class="menu-icon">
@@ -88,25 +102,27 @@
         <span class="menu-title">Charts</span>
       </a>
     </li>
+
     <li class="nav-item menu-items">
-	  <a class="nav-link" data-toggle="collapse" href="#betting-calculators" aria-expanded="false" aria-controls="betting-calculators">
-	    <span class="menu-icon">
-	      <i class="mdi mdi-calculator"></i>
-	    </span>
-	    <span class="menu-title">Betting Calculators</span>
-	    <i class="menu-arrow"></i>
-	  </a>
-	  <div class="collapse" id="betting-calculators">
-	    <ul class="nav flex-column sub-menu">
-	      <li class="nav-item"> 
-	        <a class="nav-link" th:href="@{/calculators/arbitrage}">Arbitrage Calculator</a>
-	      </li>
-	      <li class="nav-item"> 
-	        <a class="nav-link" th:href="@{/calculators/kelly}">Kelly Calculator</a>
-	      </li>
-	    </ul>
-	  </div>
-	</li>
+      <a class="nav-link" data-toggle="collapse" href="#betting-calculators" aria-expanded="false" aria-controls="betting-calculators">
+        <span class="menu-icon">
+          <i class="mdi mdi-calculator"></i>
+        </span>
+        <span class="menu-title">Betting Calculators</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="betting-calculators">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/calculators/arbitrage}">Arbitrage Calculator</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/calculators/kelly}">Kelly Calculator</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
     <!-- User Pages Menu Item with Submenu -->
     <li class="nav-item menu-items">
       <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
@@ -136,6 +152,7 @@
         </ul>
       </div>
     </li>
+
     <!-- Documentation Menu Item -->
     <li class="nav-item menu-items">
       <a class="nav-link" th:href="@{http://www.bootstrapdash.com/demo/corona-free/jquery/documentation/documentation.html}">
@@ -147,3 +164,4 @@
     </li>
   </ul>
 </nav>
+
