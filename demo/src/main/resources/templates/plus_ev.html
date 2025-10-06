@@ -22,16 +22,12 @@
         .main-panel { padding-top: 70px; min-height: 100vh; }
         .content-wrapper { padding: 20px; }
         .table-container { overflow: auto; margin-top: 20px; max-height: calc(100vh - 200px); }
-        .table-container::-webkit-scrollbar { width: 10px; height: 10px; }
-        .table-container::-webkit-scrollbar-track { background: #2c3e50; }
-        .table-container::-webkit-scrollbar-thumb { background-color: #2980b9; border-radius: 10px; border: 2px solid #2c3e50; }
-        .table-container::-webkit-scrollbar-thumb:hover { background-color: #3498db; }
-        .table-container::-webkit-scrollbar-corner { background: #2c3e50; }
 
         .panel { background: linear-gradient(to right, #2980b9, #2c3e50); padding: 0; border-radius: 10px; border: none;
                  box-shadow: 0 0 0 5px rgba(0,0,0,0.05),0 0 0 10px rgba(0,0,0,0.05); }
         .panel .panel-heading { padding: 20px 15px; border-radius: 10px 10px 0 0; margin: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
         .panel .panel-heading .title { color: #fff; font-size: 28px; font-weight: 500; line-height: 40px; margin: 0; white-space: nowrap; }
+
         .panel .panel-body .table thead th {
             color: #fff; background-color: rgba(255,255,255,0.2); font-size: 16px; font-weight: 500; text-transform: uppercase;
             padding: 12px; border: 1px solid #3c3f41; position: sticky; top: 0; z-index: 3; white-space: nowrap;
@@ -39,11 +35,18 @@
         .panel .panel-body .table tbody td {
             color: #fff; font-size: 15px; padding: 10px 12px; vertical-align: middle; border: 1px solid #3c3f41; white-space: nowrap;
         }
-        .bookmaker-logo { width: 22px; height: auto; display: inline-block; vertical-align: middle; }
-        .odds-value { display: inline-block; text-align: center; min-width: 54px; }
+
         .badge-ev-pos { background-color: #2ecc71; }
         .badge-ev-neg { background-color: #e74c3c; }
-        .subtle { opacity: .85; font-size: 12px; }
+        .bookmaker-logo { width: 22px; height: auto; display: inline-block; vertical-align: middle; }
+        .odds-value { display: inline-block; text-align: center; min-width: 54px; }
+        .subtle { opacity: .85; font-size: 12px; white-space: normal; }
+        .selection-pill {
+            display: inline-block; padding: 2px 8px; border-radius: 999px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+            font-size: 12px; margin-top: 4px;
+        }
+        .matchup-cell { white-space: normal; }
     </style>
 </head>
 <body>
@@ -104,23 +107,18 @@
                         <table class="table table-bordered" id="plusEvTable">
                             <thead>
                             <tr>
+                                <th>%EV</th>
+                                <th>Rec Bet Size</th>
                                 <th>Date</th>
-                                <th>Category</th> <!-- e.g., NFL, NCAAF, NBA (not grouped/sorted by it) -->
-                                <th>Matchup</th>
+                                <th>Event (Matchup)</th>
                                 <th>Market</th>
-                                <th>Outcome</th>
-                                <th>Fair Prob</th>
-                                <th>Fair Price (Dec)</th>
                                 <th>Best Book</th>
-                                <th>Offered</th>
-                                <th>%EV</th> <!-- renamed -->
-                                <th>Recommended Bet Size</th> <!-- renamed -->
                             </tr>
                             </thead>
                             <tbody>
                             <!-- Empty state -->
                             <tr th:if="${plusEvPicks == null or #lists.isEmpty(plusEvPicks)}">
-                                <td colspan="11">
+                                <td colspan="6">
                                     <div class="alert alert-info mb-0">
                                         No +EV picks to show yet. Once you compute fair prices and join to lines, results will appear here.
                                     </div>
@@ -129,42 +127,49 @@
 
                             <!-- Rows -->
                             <tr th:each="p : ${plusEvPicks}">
-                                <td th:text="${p.formattedCommenceTime}">Oct 10, 7:30 PM</td>
-
-                                <!-- Category: prefer p.category; fall back to sportName + market -->
-                                <td th:text="${p.category != null ? p.category : (p.sportName + ' ' + p.market)}">NFL</td>
-
+                                <!-- %EV -->
                                 <td>
-                                    <div><span th:text="${p.homeTeam}">Home Team</span></div>
-                                    <div><span th:text="${p.awayTeam}">Away Team</span></div>
+                                    <span th:class="${p.edgePct >= 0} ? 'badge badge-ev-pos' : 'badge badge-ev-neg'"
+                                          th:text="${#numbers.formatDecimal(p.edgePct, 1, 'COMMA', 2, 'POINT')} + ' %'">5.23 %</span>
                                 </td>
 
-                                <td th:text="${p.market}">h2h</td>
-                                <td th:text="${p.outcome}">HOME</td>
+                                <!-- Recommended Bet Size -->
+                                <td>
+                                    $<span th:text="${#numbers.formatDecimal(p.recommendedStakeDollars, 1, 'COMMA', 2, 'POINT')}">150.00</span>
+                                </td>
 
-                                <td><span th:text="${#numbers.formatDecimal(p.fairProb * 100, 1, 'COMMA', 2, 'POINT')} + ' %'">54.2 %</span></td>
-                                <td><span th:text="${#numbers.formatDecimal(p.fairDecimal, 1, 'COMMA', 2, 'POINT')}">1.85</span></td>
+                                <!-- Date -->
+                                <td th:text="${p.formattedCommenceTime}">10/2/2025</td>
 
+                                <!-- Event (Matchup) + sport/league + selection team name -->
+                                <td class="matchup-cell">
+                                    <div><strong th:text="${p.homeTeam}">Cleveland Browns</strong> vs <strong th:text="${p.awayTeam}">Dallas Cowboys</strong></div>
+                                    <div class="subtle" th:text="${(p.category != null && p.category != '') ? p.category : (p.sportName != null ? p.sportName : 'All Sports')}">NFL</div>
+                                    <!-- Selection (team name instead of HOME/AWAY) -->
+                                    <div class="selection-pill"
+                                         th:text="${
+                                            p.outcome == 'HOME' ? p.homeTeam :
+                                            (p.outcome == 'AWAY' ? p.awayTeam :
+                                            (p.outcome == 'OVER' ? 'Over' :
+                                            (p.outcome == 'UNDER' ? 'Under' : p.outcome)))
+                                         }">Cleveland Browns</div>
+                                </td>
+
+                                <!-- Market (pretty labels) -->
+                                <td th:text="${
+                                        p.market == 'h2h' ? 'Moneyline' :
+                                        (p.market == 'spreads' ? 'Spread' :
+                                        (p.market == 'totals' ? 'Total' : p.market))
+                                    }">Moneyline</td>
+
+                                <!-- Best Book (includes offered American odds) -->
                                 <td>
                                     <img class="bookmaker-logo"
                                          th:src="@{/images/{logo}.webp(logo=${p.bookmakerTitle.replaceAll('[^A-Za-z0-9]', '')})}"
                                          th:title="${p.bookmakerTitle}" th:alt="${p.bookmakerTitle}">
                                     <span class="ml-1" th:text="${p.bookmakerTitle}">DraftKings</span>
-                                </td>
-
-                                <td>
-                                    <span class="odds-value"
-                                          th:text="${p.offeredAmerican > 0 ? '+' + p.offeredAmerican : p.offeredAmerican}">+120</span>
-                                    <span class="subtle ml-1">(dec <span th:text="${#numbers.formatDecimal(p.offeredDecimal, 1, 'COMMA', 2, 'POINT')}">2.20</span>)</span>
-                                </td>
-
-                                <td>
-                                    <span th:class="${p.edgePct >= 0} ? 'badge badge-ev-pos' : 'badge badge-ev-neg'"
-                                          th:text="${#numbers.formatDecimal(p.edgePct, 1, 'COMMA', 2, 'POINT')} + ' %'">3.8 %</span>
-                                </td>
-
-                                <td>
-                                    $<span th:text="${#numbers.formatDecimal(p.recommendedStakeDollars, 1, 'COMMA', 2, 'POINT')}">32.50</span>
+                                    <span class="odds-value ml-2"
+                                          th:text="${p.offeredAmerican > 0 ? '+' + p.offeredAmerican : p.offeredAmerican}">+125</span>
                                 </td>
                             </tr>
                             </tbody>
@@ -189,8 +194,7 @@
 <script th:src="@{/assets/js/misc.js}"></script>
 <script th:src="@{/assets/js/settings.js}"></script>
 <script th:src="@{/assets/js/todolist.js}"></script>
-
-<!-- Optional: quick client-side search hook if you already use it -->
+<!-- Optional: reuse your tableSearch/bookmakerFilter -->
 <script th:src="@{/js/tableSearch.js}"></script>
 <script th:src="@{/js/bookmakerFilter.js}"></script>
 </body>

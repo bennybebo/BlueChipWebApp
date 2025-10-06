@@ -128,7 +128,22 @@
                   </p>
                 </div>
               </div>
+              <!-- TODO: Remove this when real premium is set up -->
+              <div class="mb-2">
+                <span class="badge" th:classappend="${isPremium} ? ' badge-success' : ' badge-secondary'">
+                  <span th:text="${isPremium} ? 'Premium' : 'Free'">Free</span>
+                </span>
+              </div>
 
+              <form th:action="@{/settings/toggle-premium}" method="post" class="mt-2">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit"
+                        class="btn"
+                        th:classappend="${isPremium} ? ' btn-outline-warning' : ' btn-success'">
+                  <i class="mdi" th:classappend="${isPremium} ? ' mdi-cancel' : ' mdi-star'"></i>
+                  <span th:text="${isPremium} ? 'Disable Premium' : 'Enable Premium'">Enable Premium</span>
+                </button>
+              </form>
             </div>
           </div>
         </div>

@@ -1,11 +1,17 @@
 package com.bluechip.demo.controller;
 
+import com.bluechip.demo.dto.FairPriceDto;
 import com.bluechip.demo.model.*;
+import com.bluechip.demo.repositories.UserRepository;
 import com.bluechip.demo.service.OddsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -16,10 +22,17 @@ public class OddsController {
     @Autowired
     private OddsService oddsService;
 
+    private final UserRepository userRepository;
+
+    public OddsController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @GetMapping("/{sport}/{market}")
     public String getOdds(
             @PathVariable("sport") String sportKey,
             @PathVariable("market") String marketType,
+            @AuthenticationPrincipal UserDetails principal,
             Model model) {
         try {
             // Fetch odds data, which will check for existing JSON file or fetch from API
@@ -43,6 +56,34 @@ public class OddsController {
             // Get the list of available sports
             List<Map<String, String>> availableSports = getAvailableSports();
 
+            // === NEW: Build fair (no-vig) prices for H2H ===
+            Map<String, FairPriceDto> fairMap = new HashMap<>();
+            if ("h2h".equalsIgnoreCase(marketType)) {
+                for (Odds odds : oddsList) {
+                    BestOdds best = odds.getBestOdds();
+                    Outcome homeOutcome = (best != null) ? best.getBestH2HHomeOutcome() : null;
+                    Outcome awayOutcome = (best != null) ? best.getBestH2HAwayOutcome() : null;
+
+                    Integer homePrice = (homeOutcome != null) ? homeOutcome.getPrice() : null;
+                    Integer awayPrice = (awayOutcome != null) ? awayOutcome.getPrice() : null;
+
+                    FairPriceDto fair = fairFromTwoMoneylines(homePrice, awayPrice);
+                    if (fair != null) {
+                        String key = odds.getHomeTeam() + " vs " + odds.getAwayTeam();
+                        fairMap.put(key, fair);
+                    }
+                }
+            }
+
+            // === NEW: role flag (Premium vs Free) ===
+            boolean isPremium = false;
+            if (principal != null) {
+                User u = userRepository.findByUsername(principal.getUsername());
+                if (u != null && u.getRoles() != null && u.getRoles().contains("ROLE_PREMIUM")) {
+                    isPremium = true;
+                }
+            }
+
             // Add attributes to the model for use in the view
             model.addAttribute("oddsList", oddsList);
             model.addAttribute("uniqueBookmakers", uniqueBookmakers);
@@ -51,6 +92,11 @@ public class OddsController {
             model.addAttribute("marketType", marketType);
             model.addAttribute("sportName", sportName);
             model.addAttribute("availableSports", availableSports);
+
+            // NEW attrs for your updated template
+            model.addAttribute("fairMap", fairMap);
+            model.addAttribute("isPremium", isPremium);
+
         } catch (IOException e) {
             e.printStackTrace();
             model.addAttribute("error", "Unable to load odds data.");
@@ -268,7 +314,7 @@ public class OddsController {
         ncaaf.put("key", "americanfootball_ncaaf");
         ncaaf.put("name", "NCAAF");
         availableSports.add(ncaaf);
-        
+
         Map<String, String> mlb = new HashMap<>();
         mlb.put("key", "baseball_mlb");
         mlb.put("name", "MLB");
@@ -278,7 +324,6 @@ public class OddsController {
         wnba.put("key", "basketball_wnba");
         wnba.put("name", "WNBA");
         availableSports.add(wnba);
-       
 
         Map<String, String> nhl = new HashMap<>();
         nhl.put("key", "icehockey_nhl");
@@ -344,5 +389,46 @@ public class OddsController {
         return matchupBookmakerMap;
     }
 
-}
+    // ====== NEW: no-vig fair price helpers ======
+    private static double americanToDecimal(Integer american) {
+        if (american == null) return Double.NaN;
+        return american > 0 ? 1.0 + (american / 100.0)
+                            : 1.0 + (100.0 / Math.abs(american));
+    }
+    private static int decimalToAmerican(double dec) {
+        if (dec <= 1.0) return 0; // guard
+        return (dec >= 2.0)
+                ? (int) Math.round((dec - 1.0) * 100.0)
+                : (int) Math.round(-100.0 / (dec - 1.0));
+    }
+    private static double r2(double v) { return Math.round(v * 100.0) / 100.0; }
 
+    private static FairPriceDto fairFromTwoMoneylines(Integer homeAmerican, Integer awayAmerican) {
+        if (homeAmerican == null || awayAmerican == null) return null;
+
+        double dH = americanToDecimal(homeAmerican);
+        double dA = americanToDecimal(awayAmerican);
+        if (!Double.isFinite(dH) || !Double.isFinite(dA)) return null;
+
+        // Implied probabilities with vig
+        double pHprime = 1.0 / dH;
+        double pAprime = 1.0 / dA;
+
+        // No-vig normalization
+        double sum = pHprime + pAprime;
+        if (sum <= 0) return null;
+
+        double pH = pHprime / sum;
+        double pA = pAprime / sum;
+
+        double dHfair = 1.0 / pH;
+        double dAfair = 1.0 / pA;
+
+        return new FairPriceDto(
+                pH, pA,
+                r2(dHfair), r2(dAfair),
+                decimalToAmerican(dHfair),
+                decimalToAmerican(dAfair)
+        );
+    }
+}

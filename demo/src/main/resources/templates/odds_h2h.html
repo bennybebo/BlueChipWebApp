@@ -19,60 +19,22 @@
     <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
     <!-- Custom CSS -->
     <style>
-	    #navbarButtonUnique {
-		    position: relative;
-		    top: 20px; /* Adjust this value as needed */
-		    /* Additional styling for the unique navbar button */
-		}
-	    .sidebar {
-		    height: 100vh; /* Full viewport height */
-		    overflow-y: auto; /* Add scroll if content overflows */
-		}
-		.template-demo .btn {
-		    position: relative;
-		    top: -8px; /* Adjust this value as needed */
-		}
-        .body {
-            background: linear-gradient(to bottom right, #1d1f21, #2c3e50);
-            color: #c9c9c9;
-            margin: 0;
-            padding: 0;
-            /* Remove padding-top to prevent extra space */
-        }
-        .main-panel {
-           
-            padding-top: 70px; /* Adjust for navbar height */
-            min-height: 100vh; /* Ensure the main panel covers full height */
-        }
-        .content-wrapper {
-            padding: 20px;
-        }
-        .table-container {
-            overflow: auto;
-            margin-top: 20px;
-            max-height: calc(100vh - 200px); /* Keeps the table within the viewport */
-        }
+        #navbarButtonUnique { position: relative; top: 20px; }
+        .sidebar { height: 100vh; overflow-y: auto; }
+        .template-demo .btn { position: relative; top: -8px; }
+        .body { background: linear-gradient(to bottom right, #1d1f21, #2c3e50); color: #c9c9c9; margin: 0; padding: 0; }
+        .main-panel { padding-top: 70px; min-height: 100vh; }
+        .content-wrapper { padding: 20px; }
+        .table-container { overflow: auto; margin-top: 20px; max-height: calc(100vh - 200px); }
+
         /* Custom Scrollbar styling */
-        .table-container::-webkit-scrollbar {
-            width: 10px; /* Width of the scrollbar */
-            height: 10px; /* Height of the scrollbar for horizontal scrolling */
-        }
-        .table-container::-webkit-scrollbar-track {
-            background: #2c3e50; /* Track color */
-        }
-        .table-container::-webkit-scrollbar-thumb {
-            background-color: #2980b9; /* Scrollbar thumb color */
-            border-radius: 10px; /* Rounded corners for the scrollbar thumb */
-            border: 2px solid #2c3e50; /* Adds a border to match the panel's background */
-        }
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background-color: #3498db; /* Lighter shade on hover */
-        }
-        /* Style for the scrollbar corner */
-        .table-container::-webkit-scrollbar-corner {
-            background: #2c3e50; /* Match this color to the theme of your table */
-        }
-        /* Panel and table styling remains the same */
+        .table-container::-webkit-scrollbar { width: 10px; height: 10px; }
+        .table-container::-webkit-scrollbar-track { background: #2c3e50; }
+        .table-container::-webkit-scrollbar-thumb { background-color: #2980b9; border-radius: 10px; border: 2px solid #2c3e50; }
+        .table-container::-webkit-scrollbar-thumb:hover { background-color: #3498db; }
+        .table-container::-webkit-scrollbar-corner { background: #2c3e50; }
+
+        /* Panel and table styling */
         .panel {
             background: linear-gradient(to right, #2980b9, #2c3e50);
             padding: 0;
@@ -115,128 +77,114 @@
             font-weight: 500;
             text-transform: uppercase;
             padding: 12px;
-            border: 1px solid #3c3f41; /* Added thin borders between rows and columns */
+            border: 1px solid #3c3f41;
             position: sticky;
             top: 0;
             z-index: 3;
+            white-space: nowrap;
         }
-        .panel .panel-body .table thead tr th:nth-child(3) {
-            white-space: nowrap; /* Ensure "Best Odds" header is on one line */
+        /* Best Odds moved to 4th column after we insert Fair Price as col 3 */
+        .panel .panel-body .table thead tr th:nth-child(4) {
+            white-space: nowrap;
         }
         .panel .panel-body .table tbody tr td {
             color: #fff;
             font-size: 15px;
             padding: 10px 12px;
             vertical-align: middle;
-            border: 1px solid #3c3f41; /* Added thin borders between rows and columns */
-            white-space: nowrap; /* Prevent AM/PM from wrapping to a new line */
+            border: 1px solid #3c3f41;
+            white-space: nowrap;
         }
-        .bookmaker-logo {
-            width: 25px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-        /* Smaller logos in best odds column */
-        .best-odds-logo {
-            width: 20px;
-            height: auto;
-        }
-        .odds-logo {
-            vertical-align: middle;
-            display: inline;
-        }
-        .best-odds-entry {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px; /* Add some space between the odds value and the logo */
-        }
-        .odds-value {
-            display: inline-block;
-            text-align: center;  /* Align text to center for consistency */
-            width: 40px;        /* Fixed width for all odds values */
-        }
-        .odds-entry {
-            display: flex;
-            align-items: center;  /* Center vertically */
-            justify-content: center;  /* Center horizontally */
-            text-align: center;  /* Ensure both odds value and logo are centered */
-            flex-direction: column; /* Align odds and logos in a vertical column */
-        }
+        .bookmaker-logo { width: 25px; height: auto; display: block; margin: 0 auto; }
+        .best-odds-logo { width: 20px; height: auto; }
+        .odds-logo { vertical-align: middle; display: inline; }
+        .best-odds-entry { display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .odds-value { display: inline-block; text-align: center; width: 40px; }
+        .odds-entry { display: flex; align-items: center; justify-content: center; text-align: center; flex-direction: column; }
+
+        /* Fair price lock/blur styles */
+        .blurred { filter: blur(3px); user-select: none; }
+        .lock-hint { font-size: 12px; opacity: .85; margin-top: 4px; }
+        .fair-price-cell { white-space: normal; line-height: 1.2; }
+        .fair-line { display: flex; align-items: baseline; gap: 6px; }
+        .fair-dec { opacity:.85; font-size: 12px; }
     </style>
 </head>
 <body>
     <div class="container-scroller">
-    	<div th:insert="~{partials/sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
+        <div th:insert="~{partials/sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
         <div class="container-fluid page-body-wrapper">
-        	<div th:insert="~{partials/navbar :: navbar(user=${user})}"></div>
+            <div th:insert="~{partials/navbar :: navbar(user=${user})}"></div>
+
             <!-- Main Panel -->
             <div class="main-panel">
                 <div class="content-wrapper">
-                    <!-- Main Content -->
                     <div class="panel">
                         <div class="panel-heading">
-					        <div class="d-flex align-items-center flex-nowrap w-100">
-						    <!-- Table Title -->
-						    <h1 class="title mb-0 mr-4 align-self-center">[[${sportName}]] Odds</h1>
-						    
-						    <!-- Button and Search Section -->
-						    <div class="d-flex align-items-center mt-2 mt-md-0 flex-grow-1">
-						        <!-- Fixed-width Button Group -->
-						        <div class="template-demo d-flex align-items-center flex-nowrap mr-3" style="flex-shrink: 0;">
-						            <a class="btn btn-outline-light btn-fw" 
-						               th:classappend="${marketType} == 'h2h' ? ' active'" 
-						               th:href="@{'/odds/' + ${sportKey} + '/h2h'}">Moneyline</a>
-						               
-						            <a class="btn btn-outline-light btn-fw" 
-						               th:classappend="${marketType} == 'spreads' ? ' active'" 
-						               th:href="@{'/odds/' + ${sportKey} + '/spreads'}">Spreads</a>
-						               
-						            <a class="btn btn-outline-light btn-fw" 
-						               th:classappend="${marketType} == 'totals' ? ' active'" 
-						               th:href="@{'/odds/' + ${sportKey} + '/totals'}">Totals</a>
-						        </div>
-						        
-						        <!-- Search Input -->
-						        <div class="btn_group d-flex align-items-center mr-3" style="flex-shrink: 0;">
-						            <input type="text" id="tableSearch" class="form-control" placeholder="Search">
-						        </div>
-					
-						        <!-- Expandable Select Sportsbooks Button -->
-						        <div class="flex-grow-1" id="sportsbookDropdownContainer">
-						            <div class="dropdown w-100">
-						                <button class="btn btn-outline-light btn-fw dropdown-toggle w-100" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						                    Select Sportsbooks
-						                </button>
-						                <div class="dropdown-menu w-100" style="max-height: 300px; overflow-y: auto;">
-						                    <h6 class="dropdown-header">Available Sportsbooks</h6>
-						                    <div class="bookmaker-checkboxes d-flex flex-wrap">
-						                        <div th:each="bookmaker : ${uniqueBookmakers}" class="mr-2">
-						                            <label>
-						                                <input type="checkbox" class="bookmaker-checkbox" 
-						                                       th:attr="data-bookmaker=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')}" checked>
-						                                <span th:text="${bookmaker.title}"></span>
-						                            </label>
-						                        </div>
-						                    </div>
-						                </div>
-						            </div>
-						        </div>
-						    </div>
-						</div>
-                        <!-- Table of Matchups and H2H Odds -->
+                            <div class="d-flex align-items-center flex-nowrap w-100">
+                                <h1 class="title mb-0 mr-4 align-self-center">[[${sportName}]] Odds</h1>
+
+                                <div class="d-flex align-items-center mt-2 mt-md-0 flex-grow-1">
+                                    <!-- View toggles -->
+                                    <div class="template-demo d-flex align-items-center flex-nowrap mr-3" style="flex-shrink: 0;">
+                                        <a class="btn btn-outline-light btn-fw"
+                                           th:classappend="${marketType} == 'h2h' ? ' active'"
+                                           th:href="@{'/odds/' + ${sportKey} + '/h2h'}">Moneyline</a>
+
+                                        <a class="btn btn-outline-light btn-fw"
+                                           th:classappend="${marketType} == 'spreads' ? ' active'"
+                                           th:href="@{'/odds/' + ${sportKey} + '/spreads'}">Spreads</a>
+
+                                        <a class="btn btn-outline-light btn-fw"
+                                           th:classappend="${marketType} == 'totals' ? ' active'"
+                                           th:href="@{'/odds/' + ${sportKey} + '/totals'}">Totals</a>
+                                    </div>
+
+                                    <!-- Search -->
+                                    <div class="btn_group d-flex align-items-center mr-3" style="flex-shrink: 0;">
+                                        <input type="text" id="tableSearch" class="form-control" placeholder="Search">
+                                    </div>
+
+                                    <!-- Sportsbook filter -->
+                                    <div class="flex-grow-1" id="sportsbookDropdownContainer">
+                                        <div class="dropdown w-100">
+                                            <button class="btn btn-outline-light btn-fw dropdown-toggle w-100" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Select Sportsbooks
+                                            </button>
+                                            <div class="dropdown-menu w-100" style="max-height: 300px; overflow-y: auto;">
+                                                <h6 class="dropdown-header">Available Sportsbooks</h6>
+                                                <div class="bookmaker-checkboxes d-flex flex-wrap">
+                                                    <div th:each="bookmaker : ${uniqueBookmakers}" class="mr-2">
+                                                        <label>
+                                                            <input type="checkbox" class="bookmaker-checkbox"
+                                                                   th:attr="data-bookmaker=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')}" checked>
+                                                            <span th:text="${bookmaker.title}"></span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> <!-- controls -->
+                            </div>
+                        </div>
+
+                        <!-- Table -->
                         <div class="panel-body table-container">
                             <table class="table table-bordered" id="matchupsTable">
                                 <thead>
                                     <tr>
                                         <th>Date</th>
                                         <th>Teams</th>
+
+                                        <!-- NEW: Fair Price (No Vig) -->
+                                        <th>Fair Price (No Vig)</th>
+
                                         <th>Best Odds</th>
-                                        <th th:each="bookmaker : ${uniqueBookmakers}" th:attr="data-bookmaker=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')}">
+                                        <th th:each="bookmaker : ${uniqueBookmakers}"
+                                            th:attr="data-bookmaker=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')}">
                                             <img th:src="@{/images/{logoImageName}.webp(logoImageName=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
-                                                 th:title="${bookmaker.title}"
-                                                 th:alt="${bookmaker.title}"
+                                                 th:title="${bookmaker.title}" th:alt="${bookmaker.title}"
                                                  class="bookmaker-logo">
                                         </th>
                                     </tr>
@@ -244,33 +192,69 @@
                                 <tbody>
                                     <th:block th:each="odds : ${oddsList}">
                                         <tr>
-                                            <!-- Date Cell -->
+                                            <!-- Date -->
                                             <td th:text="${odds.formattedCommenceTime}" class="date-cell"></td>
 
-                                            <!-- Teams Cell with spacing -->
+                                            <!-- Teams -->
                                             <td>
-                                                <div class="team-name">
-                                                    <span th:text="${odds.homeTeam}"></span>
+                                                <div class="team-name"><span th:text="${odds.homeTeam}"></span></div>
+                                                <div><span th:text="${odds.awayTeam}"></span></div>
+                                            </td>
+
+                                            <!-- NEW: Fair Price (No Vig) Cell -->
+                                            <td class="fair-price-cell"
+                                                th:with="fair=${fairMap != null ? fairMap[odds.homeTeam + ' vs ' + odds.awayTeam] : null}">
+                                                <!-- Premium users (isPremium=true) see actual values if present -->
+                                                <div th:if="${isPremium}">
+                                                    <div class="fair-line">
+                                                        <strong th:text="${odds.homeTeam}">Home</strong>:
+                                                        <span th:text="${fair != null ? (fair.homeAmerican > 0 ? '+' + fair.homeAmerican : fair.homeAmerican) : '—'}">+112</span>
+                                                        <span class="fair-dec">
+                                                            (dec <span th:text="${fair != null ? #numbers.formatDecimal(fair.homeDecimal,1,'COMMA',2,'POINT') : '—'}">2.12</span>)
+                                                        </span>
+                                                    </div>
+                                                    <div class="fair-line">
+                                                        <strong th:text="${odds.awayTeam}">Away</strong>:
+                                                        <span th:text="${fair != null ? (fair.awayAmerican > 0 ? '+' + fair.awayAmerican : fair.awayAmerican) : '—'}">-105</span>
+                                                        <span class="fair-dec">
+                                                            (dec <span th:text="${fair != null ? #numbers.formatDecimal(fair.awayDecimal,1,'COMMA',2,'POINT') : '—'}">1.95</span>)
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <span th:text="${odds.awayTeam}"></span>
+
+                                                <!-- Free users see blurred/locked placeholder -->
+                                                <div th:unless="${isPremium}">
+                                                    <div class="blurred">
+                                                        <div class="fair-line">
+                                                            <strong th:text="${odds.homeTeam}">Home</strong>: +000 <span class="fair-dec">(dec 0.00)</span>
+                                                        </div>
+                                                        <div class="fair-line">
+                                                            <strong th:text="${odds.awayTeam}">Away</strong>: +000 <span class="fair-dec">(dec 0.00)</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="lock-hint">
+                                                        <i class="mdi mdi-lock-outline"></i>
+                                                        <a th:href="@{/settings}" class="text-info">Unlock fair prices with Premium</a>
+                                                    </div>
                                                 </div>
                                             </td>
 
-                                            <!-- Best Odds Cell with smaller logos -->
+                                            <!-- Best Odds -->
                                             <td>
-                                                <!-- Home Team Best Odds -->
+                                                <!-- Home -->
                                                 <div class="best-odds-entry">
-                                                    <span class="odds-value" th:text="${odds.bestOdds.bestH2HHomeOutcome != null ? (odds.bestOdds.bestH2HHomeOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HHomeOutcome.price : odds.bestOdds.bestH2HHomeOutcome.price) : 'N/A'}"></span>
+                                                    <span class="odds-value"
+                                                          th:text="${odds.bestOdds.bestH2HHomeOutcome != null ? (odds.bestOdds.bestH2HHomeOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HHomeOutcome.price : odds.bestOdds.bestH2HHomeOutcome.price) : 'N/A'}"></span>
                                                     <img th:if="${odds.bestOdds.bestH2HHomeBookmaker != null}"
                                                          th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HHomeBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
                                                          th:title="${odds.bestOdds.bestH2HHomeBookmaker.title}"
                                                          th:alt="${odds.bestOdds.bestH2HHomeBookmaker.title}"
                                                          class="bookmaker-logo odds-logo best-odds-logo">
                                                 </div>
-                                                <!-- Away Team Best Odds -->
+                                                <!-- Away -->
                                                 <div class="best-odds-entry">
-                                                    <span class="odds-value" th:text="${odds.bestOdds.bestH2HAwayOutcome != null ? (odds.bestOdds.bestH2HAwayOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HAwayOutcome.price : odds.bestOdds.bestH2HAwayOutcome.price) : 'N/A'}"></span>
+                                                    <span class="odds-value"
+                                                          th:text="${odds.bestOdds.bestH2HAwayOutcome != null ? (odds.bestOdds.bestH2HAwayOutcome.price > 0 ? '+' + odds.bestOdds.bestH2HAwayOutcome.price : odds.bestOdds.bestH2HAwayOutcome.price) : 'N/A'}"></span>
                                                     <img th:if="${odds.bestOdds.bestH2HAwayBookmaker != null}"
                                                          th:src="@{/images/{logoImageName}.webp(logoImageName=${odds.bestOdds.bestH2HAwayBookmaker.title.replaceAll('[^A-Za-z0-9]', '')})}"
                                                          th:title="${odds.bestOdds.bestH2HAwayBookmaker.title}"
@@ -279,11 +263,12 @@
                                                 </div>
                                             </td>
 
-                                            <!-- Bookmaker Odds Cells -->
-                                            <td th:each="bookmaker : ${uniqueBookmakers}" th:attr="data-bookmaker=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')}">
+                                            <!-- Per-book odds -->
+                                            <td th:each="bookmaker : ${uniqueBookmakers}"
+                                                th:attr="data-bookmaker=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')}">
                                                 <div th:if="${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title] != null}">
                                                     <div th:each="market : ${matchupBookmakerMap[odds.homeTeam + ' vs ' + odds.awayTeam][bookmaker.title].markets}" th:if="${market.key == 'h2h'}">
-                                                        <!-- Home Team Odds -->
+                                                        <!-- Home -->
                                                         <div class="odds-entry">
                                                             <span class="odds-value" th:each="outcome : ${market.outcomes}">
                                                                 <span th:if="${outcome.name == odds.homeTeam}"
@@ -291,7 +276,7 @@
                                                                       th:classappend="${outcome == odds.bestOdds.bestH2HHomeOutcome} ? 'best-odds' : ''"></span>
                                                             </span>
                                                         </div>
-                                                        <!-- Away Team Odds -->
+                                                        <!-- Away -->
                                                         <div class="odds-entry">
                                                             <span class="odds-value" th:each="outcome : ${market.outcomes}">
                                                                 <span th:if="${outcome.name == odds.awayTeam}"
@@ -310,14 +295,10 @@
                     </div>
                     <!-- panel ends -->
                 </div>
-                <!-- content-wrapper ends -->
             </div>
-            <!-- main-panel ends -->
         </div>
-        <!-- page-body-wrapper ends -->
     </div>
-</div>
-    <!-- container-scroller ends -->
+
     <!-- Vendor JS -->
     <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
     <!-- Plugin JS -->

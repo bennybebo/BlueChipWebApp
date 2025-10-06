@@ -22,12 +22,8 @@ public class CalculatorController {
     public String showArbitrageCalculator() {
         return "calculators/arbitrage";
     }
-
-    // // Handler for the Kelly Calculator page
-    // @GetMapping("/calculators/kelly")
-    // public String showKellyCalculator() {
-    //     return "calculators/kelly";
-    // }
+    
+    // Handler for the Kelly Calculator page
     @GetMapping("/calculators/kelly")
     public String kelly(@AuthenticationPrincipal UserDetails principal, Model model) {
         double bankrollDollars = 0.0;
