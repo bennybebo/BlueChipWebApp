@@ -1,0 +1,26 @@
+- Add fair pricing to Spreads and Totals.
+
+- Populate +EV page with real data.
+
+- Cleanup unused navbar icons.
+
+- Edit user settings and sidebar to dynamically show Premium status and user's name.
+
+- Get webp for betanything logo.
+
+- Add feature in user settings to toggle decimal/american odds.
+
+- Add tool tip for fair prices column.
+
+- Store user's selected sports books
+
+Long term TODOs:
+- Player props
+- Arbitrage page
+- Bet tracking
+- Historical odds/bet data
+- Testing
+- Stripe integration for premium users
+- Deploy website
+- Cleanup unsued code and imports
+- Transition to automatic odds fetching and storage

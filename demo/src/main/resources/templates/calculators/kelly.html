@@ -12,59 +12,161 @@
     <!-- Favicon -->
     <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
     <style>
-    	#navbarButtonUnique {
-		    position: relative;
-		    top: 20px; /* Adjust this value as needed */
-		    /* Additional styling for the unique navbar button */
-		}
-	    .sidebar {
-		    height: 100vh; /* Full viewport height */
-		    overflow-y: auto; /* Add scroll if content overflows */
-		}
-        /* Page Background */
+        #navbarButtonUnique {
+            position: relative;
+            top: 20px;
+        }
+        .sidebar { height: 100vh; overflow-y: auto; }
         .body {
             background: linear-gradient(to bottom right, #1d1f21, #2c3e50);
             color: #c9c9c9;
             margin: 0;
             padding: 0;
         }
-        .main-panel {
-            padding-top: 70px; /* Adjust for navbar height */
-            min-height: 100vh; /* Ensure the main panel covers full height */
-        }
-        .content-wrapper {
-            padding: 20px;
-        }
+        .main-panel { padding-top: 70px; min-height: 100vh; }
+        .content-wrapper { padding: 20px; }
     </style>
 </head>
 <body>
-    <div class="container-scroller">
-        <!-- Sidebar -->
-        <div th:insert="~{partials/sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
+<div class="container-scroller">
+    <!-- Sidebar -->
+    <div th:insert="~{partials/sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
 
-        <div class="container-fluid page-body-wrapper">
-            <!-- Navbar -->
-            <div th:insert="~{partials/navbar :: navbar(user=${user})}"></div>
+    <div class="container-fluid page-body-wrapper">
+        <!-- Navbar -->
+        <div th:insert="~{partials/navbar :: navbar(user=${user})}"></div>
 
-            <!-- Main Panel -->
-            <div class="main-panel">
-                <div class="content-wrapper">
-                    <!-- Content for Arbitrage Calculator goes here -->
+        <!-- Main Panel -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <!-- Kelly Calculator -->
+                <div class="row">
+                    <div class="col-12 col-lg-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title mb-3">Kelly Calculator</h4>
+
+                                <p th:if="${fromSettings}" class="mb-3" style="color:#2d6a4f;">
+                                    Prefilled from your <a th:href="@{/settings}">settings</a>.
+                                </p>
+
+                                <form id="kelly-form" onsubmit="return false;">
+                                    <div class="row">
+                                        <div class="col-sm-6 mb-3">
+                                            <label for="bankroll" class="form-label">Bankroll (USD)</label>
+                                            <input id="bankroll" name="bankroll" type="number" step="0.01" min="0"
+                                                   class="form-control"
+                                                   th:value="${bankrollDollars}">
+                                        </div>
+                                        <div class="col-sm-6 mb-3">
+                                            <label for="kellyFraction" class="form-label">Kelly Fraction (0–1)</label>
+                                            <input id="kellyFraction" name="kellyFraction" type="number" step="0.05" min="0" max="1"
+                                                   class="form-control"
+                                                   th:value="${kellyFraction}">
+                                            <small class="text-muted">e.g., 0.5 for half-Kelly</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-6 mb-3">
+                                            <label for="americanOdds" class="form-label">American Odds</label>
+                                            <input id="americanOdds" type="number" step="1" class="form-control" placeholder="-110 or +150">
+                                        </div>
+                                        <div class="col-sm-6 mb-3">
+                                            <label for="winProb" class="form-label">Win Probability (0–1)</label>
+                                            <input id="winProb" type="number" step="0.01" min="0" max="1" class="form-control" placeholder="e.g., 0.55">
+                                        </div>
+                                    </div>
+
+                                    <button type="button" id="calcBtn" class="btn btn-primary">Calculate stake</button>
+                                </form>
+
+                                <div id="result" class="mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Tips</h5>
+                                <ul class="mb-0">
+                                    <li>Enter your fair win probability (not the implied from the book).</li>
+                                    <li>If the edge is negative, Kelly recommends no bet.</li>
+                                    <li>Fractional Kelly (e.g., 0.5) reduces variance.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <!-- content-wrapper ends -->
+                <!-- /Kelly Calculator -->
             </div>
-            <!-- main-panel ends -->
+            <!-- content-wrapper ends -->
         </div>
-        <!-- page-body-wrapper ends -->
+        <!-- main-panel ends -->
     </div>
-    <!-- container-scroller ends -->
+    <!-- page-body-wrapper ends -->
+</div>
+<!-- container-scroller ends -->
 
-    <!-- Vendor JS -->
-    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
-    <!-- Inject JS -->
-    <script th:src="@{/assets/js/off-canvas.js}"></script>
-    <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
-    <script th:src="@{/assets/js/misc.js}"></script>
-    <script th:src="@{/assets/js/settings.js}"></script>
+<!-- Vendor JS -->
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<!-- Inject JS -->
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+<script th:src="@{/assets/js/settings.js}"></script>
+
+<!-- Kelly logic -->
+<script>
+(function() {
+    function americanToDecimal(a) {
+        a = Number(a);
+        if (!Number.isFinite(a) || a === 0) return NaN;
+        return a > 0 ? 1 + (a / 100) : 1 + (100 / Math.abs(a));
+    }
+
+    function kellyStake(bankroll, kellyFraction, p, decimalOdds) {
+        const b = decimalOdds - 1;
+        const q = 1 - p;
+        const fStar = (b * p - q) / b;        // full Kelly fraction of bankroll
+        const f = Math.max(0, fStar) * kellyFraction;
+        return { stake: bankroll * f, fStar: Math.max(0, fStar), fUsed: Math.max(0, fStar) * kellyFraction };
+    }
+
+    const calcBtn = document.getElementById('calcBtn');
+    const resultEl = document.getElementById('result');
+
+    calcBtn.addEventListener('click', () => {
+        const bankroll = parseFloat(document.getElementById('bankroll').value) || 0;
+        const kellyFrac = Math.min(1, Math.max(0, parseFloat(document.getElementById('kellyFraction').value) || 0.5));
+        const american = parseFloat(document.getElementById('americanOdds').value);
+        const p = parseFloat(document.getElementById('winProb').value);
+
+        if (!(p >= 0 && p <= 1)) {
+            resultEl.innerHTML = '<div class="text-danger">Enter win probability between 0 and 1.</div>';
+            return;
+        }
+
+        const d = americanToDecimal(american);
+        if (!Number.isFinite(d)) {
+            resultEl.innerHTML = '<div class="text-danger">Enter valid American odds (e.g., -110 or +150).</div>';
+            return;
+        }
+
+        const { stake, fStar, fUsed } = kellyStake(bankroll, kellyFrac, p, d);
+        const edgePct = (p * d - 1) * 100; // EV% of stake
+
+        resultEl.innerHTML =
+            `<div class="alert alert-info mb-0">
+                <div><strong>Recommended stake:</strong> $${stake.toFixed(2)}</div>
+                <div><strong>Full Kelly fraction:</strong> ${fStar.toFixed(4)}</div>
+                <div><strong>Using your fraction (${kellyFrac.toFixed(2)}×):</strong> ${fUsed.toFixed(4)}</div>
+                <div><strong>Edge:</strong> ${edgePct.toFixed(2)}%</div>
+                <div class="mt-2 text-muted">Decimal odds: ${d.toFixed(3)}</div>
+             </div>`;
+    });
+})();
+</script>
 </body>
 </html>

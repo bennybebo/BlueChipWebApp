@@ -37,10 +37,12 @@ public class RegistrationController {
             return "register";
         }
         
+        /* 
         if (!user.getPassword().equals(user.getConfirmPassword())) {
             model.addAttribute("confirmPasswordError", "Passwords do not match.");
             return "register";
         }
+            */
 
         if (userRepository.findByUsername(user.getUsername()) != null) {
             model.addAttribute("registrationError", "Username already exists.");

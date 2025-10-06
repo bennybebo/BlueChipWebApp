@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Plus-EV Picks</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Vendor + Theme CSS -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/jvectormap/jquery-jvectormap.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/flag-icon-css/css/flag-icon.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.theme.default.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+
+    <style>
+        #navbarButtonUnique { position: relative; top: 20px; }
+        .sidebar { height: 100vh; overflow-y: auto; }
+        .body { background: linear-gradient(to bottom right, #1d1f21, #2c3e50); color: #c9c9c9; margin: 0; padding: 0; }
+        .main-panel { padding-top: 70px; min-height: 100vh; }
+        .content-wrapper { padding: 20px; }
+        .table-container { overflow: auto; margin-top: 20px; max-height: calc(100vh - 200px); }
+
+        .panel { background: linear-gradient(to right, #2980b9, #2c3e50); padding: 0; border-radius: 10px; border: none;
+                 box-shadow: 0 0 0 5px rgba(0,0,0,0.05),0 0 0 10px rgba(0,0,0,0.05); }
+        .panel .panel-heading { padding: 20px 15px; border-radius: 10px 10px 0 0; margin: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .panel .panel-heading .title { color: #fff; font-size: 28px; font-weight: 500; line-height: 40px; margin: 0; white-space: nowrap; }
+
+        .panel .panel-body .table thead th {
+            color: #fff; background-color: rgba(255,255,255,0.2); font-size: 16px; font-weight: 500; text-transform: uppercase;
+            padding: 12px; border: 1px solid #3c3f41; position: sticky; top: 0; z-index: 3; white-space: nowrap;
+        }
+        .panel .panel-body .table tbody td {
+            color: #fff; font-size: 15px; padding: 10px 12px; vertical-align: middle; border: 1px solid #3c3f41; white-space: nowrap;
+        }
+
+        .badge-ev-pos { background-color: #2ecc71; }
+        .badge-ev-neg { background-color: #e74c3c; }
+        .bookmaker-logo { width: 22px; height: auto; display: inline-block; vertical-align: middle; }
+        .odds-value { display: inline-block; text-align: center; min-width: 54px; }
+        .subtle { opacity: .85; font-size: 12px; white-space: normal; }
+        .selection-pill {
+            display: inline-block; padding: 2px 8px; border-radius: 999px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+            font-size: 12px; margin-top: 4px;
+        }
+        .matchup-cell { white-space: normal; }
+    </style>
+</head>
+<body>
+<div class="container-scroller">
+    <!-- Sidebar -->
+    <div th:insert="~{partials/sidebar :: sidebar(marketType=${marketType}, sportKey=${sportKey}, availableSports=${availableSports})}"></div>
+
+    <div class="container-fluid page-body-wrapper">
+        <!-- Navbar -->
+        <div th:insert="~{partials/navbar :: navbar(user=${user})}"></div>
+
+        <!-- Main Panel -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <div class="d-flex align-items-center flex-nowrap w-100">
+                            <h1 class="title mb-0 mr-4">Plus-EV Picks</h1>
+
+                            <div class="d-flex align-items-center mt-2 mt-md-0 flex-grow-1">
+                                <!-- Search -->
+                                <div class="d-flex align-items-center mr-3" style="flex-shrink: 0;">
+                                    <input type="text" id="tableSearch" class="form-control" placeholder="Search teams, book, category…">
+                                </div>
+
+                                <!-- Sportsbook filter (optional) -->
+                                <div class="flex-grow-1" id="sportsbookDropdownContainer">
+                                    <div class="dropdown w-100">
+                                        <button class="btn btn-outline-light btn-fw dropdown-toggle w-100" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Select Sportsbooks
+                                        </button>
+                                        <div class="dropdown-menu w-100" style="max-height: 300px; overflow-y: auto;">
+                                            <h6 class="dropdown-header">Available Sportsbooks</h6>
+                                            <div class="bookmaker-checkboxes d-flex flex-wrap">
+                                                <div th:each="bookmaker : ${uniqueBookmakers}" class="mr-2">
+                                                    <label>
+                                                        <input type="checkbox" class="bookmaker-checkbox"
+                                                               th:attr="data-bookmaker=${bookmaker.title.replaceAll('[^A-Za-z0-9]', '')}" checked>
+                                                        <span th:text="${bookmaker.title}">DraftKings</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right-side status: bankroll + kelly -->
+                                <div class="ml-3 subtle" th:if="${bankrollDollars != null and kellyFraction != null}">
+                                    Bankroll: $[[${#numbers.formatDecimal(bankrollDollars, 1, 'COMMA', 2, 'POINT')}]]
+                                    · Kelly: [[${kellyFraction}]]x
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="panel-body table-container">
+                        <table class="table table-bordered" id="plusEvTable">
+                            <thead>
+                            <tr>
+                                <th>%EV</th>
+                                <th>Rec Bet Size</th>
+                                <th>Date</th>
+                                <th>Event (Matchup)</th>
+                                <th>Market</th>
+                                <th>Best Book</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- Empty state -->
+                            <tr th:if="${plusEvPicks == null or #lists.isEmpty(plusEvPicks)}">
+                                <td colspan="6">
+                                    <div class="alert alert-info mb-0">
+                                        No +EV picks to show yet. Once you compute fair prices and join to lines, results will appear here.
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Rows -->
+                            <tr th:each="p : ${plusEvPicks}">
+                                <!-- %EV -->
+                                <td>
+                                    <span th:class="${p.edgePct >= 0} ? 'badge badge-ev-pos' : 'badge badge-ev-neg'"
+                                          th:text="${#numbers.formatDecimal(p.edgePct, 1, 'COMMA', 2, 'POINT')} + ' %'">5.23 %</span>
+                                </td>
+
+                                <!-- Recommended Bet Size -->
+                                <td>
+                                    $<span th:text="${#numbers.formatDecimal(p.recommendedStakeDollars, 1, 'COMMA', 2, 'POINT')}">150.00</span>
+                                </td>
+
+                                <!-- Date -->
+                                <td th:text="${p.formattedCommenceTime}">10/2/2025</td>
+
+                                <!-- Event (Matchup) + sport/league + selection team name -->
+                                <td class="matchup-cell">
+                                    <div><strong th:text="${p.homeTeam}">Cleveland Browns</strong> vs <strong th:text="${p.awayTeam}">Dallas Cowboys</strong></div>
+                                    <div class="subtle" th:text="${(p.category != null && p.category != '') ? p.category : (p.sportName != null ? p.sportName : 'All Sports')}">NFL</div>
+                                    <!-- Selection (team name instead of HOME/AWAY) -->
+                                    <div class="selection-pill"
+                                         th:text="${
+                                            p.outcome == 'HOME' ? p.homeTeam :
+                                            (p.outcome == 'AWAY' ? p.awayTeam :
+                                            (p.outcome == 'OVER' ? 'Over' :
+                                            (p.outcome == 'UNDER' ? 'Under' : p.outcome)))
+                                         }">Cleveland Browns</div>
+                                </td>
+
+                                <!-- Market (pretty labels) -->
+                                <td th:text="${
+                                        p.market == 'h2h' ? 'Moneyline' :
+                                        (p.market == 'spreads' ? 'Spread' :
+                                        (p.market == 'totals' ? 'Total' : p.market))
+                                    }">Moneyline</td>
+
+                                <!-- Best Book (includes offered American odds) -->
+                                <td>
+                                    <img class="bookmaker-logo"
+                                         th:src="@{/images/{logo}.webp(logo=${p.bookmakerTitle.replaceAll('[^A-Za-z0-9]', '')})}"
+                                         th:title="${p.bookmakerTitle}" th:alt="${p.bookmakerTitle}">
+                                    <span class="ml-1" th:text="${p.bookmakerTitle}">DraftKings</span>
+                                    <span class="odds-value ml-2"
+                                          th:text="${p.offeredAmerican > 0 ? '+' + p.offeredAmerican : p.offeredAmerican}">+125</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /panel-body -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vendor JS -->
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/vendors/chart.js/Chart.min.js}"></script>
+<script th:src="@{/assets/vendors/progressbar.js/progressbar.min.js}"></script>
+<script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap.min.js}"></script>
+<script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js}"></script>
+<script th:src="@{/assets/vendors/owl-carousel-2/owl.carousel.min.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+<script th:src="@{/assets/js/settings.js}"></script>
+<script th:src="@{/assets/js/todolist.js}"></script>
+<!-- Optional: reuse your tableSearch/bookmakerFilter -->
+<script th:src="@{/js/tableSearch.js}"></script>
+<script th:src="@{/js/bookmakerFilter.js}"></script>
+</body>
+</html>

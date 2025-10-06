@@ -1,0 +1,20 @@
+spring:
+  profiles:
+    active: dev
+---
+spring:
+  config:
+    activate.on-profile: dev
+  datasource:
+    url: jdbc:postgresql://localhost:${PGPORT:5432}/bluechip
+    username: ${POSTGRES_USER:bluechip}
+    password: ${POSTGRES_PASSWORD:change_me_locally}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+    baseline-on-migrate: true

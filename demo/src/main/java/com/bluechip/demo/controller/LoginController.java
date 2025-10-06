@@ -8,6 +8,6 @@ public class LoginController {
 
     @GetMapping("/login")
     public String showLoginForm() {
-        return "login"; // This corresponds to login.html in your templates directory
+        return "login";
     }
 }
