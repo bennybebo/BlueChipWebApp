@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import com.bluechip.demo.model.User;
 import com.bluechip.demo.repositories.UserRepository;
 
 @Controller
@@ -31,7 +32,7 @@ public class CalculatorController {
         boolean fromSettings = false;
 
         if (principal != null) {
-            var user = users.findByUsername(principal.getUsername());
+            User user = users.findByUsername(principal.getUsername());
             if (user != null) {
                 bankrollDollars = user.getBankrollCents() / 100.0;
                 kellyFraction = user.getPreferredKellyFraction();

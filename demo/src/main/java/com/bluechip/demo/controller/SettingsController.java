@@ -5,7 +5,10 @@ import com.bluechip.demo.repositories.UserRepository;
 import com.bluechip.demo.service.CustomUserDetailsService;
 import com.bluechip.demo.forms.SettingsForm;
 import jakarta.validation.Valid;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -86,10 +89,10 @@ public class SettingsController {
         user.setRoles(updatedRoles);
         users.save(user);
 
-        var updated = userDetailsService.loadUserByUsername(user.getUsername());
-        var newAuth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+        UserDetails updated = userDetailsService.loadUserByUsername(user.getUsername());
+        UsernamePasswordAuthenticationToken newAuth = new UsernamePasswordAuthenticationToken(
                 updated, updated.getPassword(), updated.getAuthorities());
-        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(newAuth);
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
         boolean nowPremium = hasRole(updatedRoles, "ROLE_PREMIUM");
         ra.addFlashAttribute("success", nowPremium ? "Premium enabled." : "Premium disabled.");
         return "redirect:/settings";

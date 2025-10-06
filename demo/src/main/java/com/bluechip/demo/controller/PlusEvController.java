@@ -24,7 +24,7 @@ public class PlusEvController {
     @GetMapping
     public String view(@AuthenticationPrincipal UserDetails principal, Model model) {
         double bankroll = 0.0;
-        double kelly    = 0.5;
+        double kelly = 0.5;
         User user = null;
 
         if (principal != null) {
@@ -63,7 +63,6 @@ public class PlusEvController {
     }
 
     // Helpers
-
     private PlusEvPickDto buildPick(
             String time, String category, String sportName,
             String home, String away, String market, String outcome,
