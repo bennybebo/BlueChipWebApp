@@ -9,34 +9,28 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Getter
+@Setter
 public class Odds {
-    @Getter @Setter
     private String id;
 
     @JsonProperty("sport_key")  // Map "sport_key" to the Java field "sportKey" e.g.(americanfootball_nfl)
-    @Getter @Setter
     private String sportKey;
 
     @JsonProperty("sport_title")  // Map "sport_title" to the Java field "sportTitle"
-    @Getter @Setter
     private String sportTitle;
 
     @JsonProperty("commence_time")  // Map "commence_time" to the Java field "commenceTime"
-    @Getter @Setter
     private String commenceTime;
 
     @JsonProperty("home_team")  // Map "home_team" to the Java field "homeTeam"
-    @Getter @Setter
     private String homeTeam;
 
     @JsonProperty("away_team")  // Map "away_team" to the Java field "awayTeam"
-    @Getter @Setter
     private String awayTeam;
 
-    @Getter @Setter
     private List<Bookmaker> bookmakers;
     
-    @Getter @Setter
     private BestOdds bestOdds;
 
     // Method to parse commenceTime string into ZonedDateTime
