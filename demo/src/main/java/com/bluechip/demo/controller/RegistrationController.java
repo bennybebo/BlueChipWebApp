@@ -2,7 +2,6 @@ package com.bluechip.demo.controller;
 
 import com.bluechip.demo.model.User;
 import com.bluechip.demo.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +17,6 @@ public class RegistrationController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
     public RegistrationController(UserRepository userRepository,
                                   PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
