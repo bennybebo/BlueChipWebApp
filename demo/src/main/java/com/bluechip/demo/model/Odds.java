@@ -7,6 +7,7 @@ import lombok.Getter;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -32,6 +33,8 @@ public class Odds {
     private List<Bookmaker> bookmakers;
     
     private BestOdds bestOdds;
+
+    private List<OutcomeSummary> outcomeSummaries = new ArrayList<>();
 
     // Method to parse commenceTime string into ZonedDateTime
     public ZonedDateTime getCommenceTimeAsZonedDateTime() {
