@@ -19,6 +19,12 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
 		<!-- Spring Boot Starter Web for building REST APIs and web applications -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
