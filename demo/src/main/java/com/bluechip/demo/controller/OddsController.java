@@ -79,6 +79,8 @@ public class OddsController {
             model.addAttribute("availableSports", availableSports);
             model.addAttribute("fairMap", fairMap);
             model.addAttribute("isPremium", isPremium);
+            model.addAttribute("refreshedAt", result.refreshedAt());
+            model.addAttribute("didRefresh", result.refreshed());
 
         } catch (IOException e) {
             e.printStackTrace();

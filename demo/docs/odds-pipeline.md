@@ -18,9 +18,13 @@ sportsbook odds data when refreshes arrive every 1–5 minutes.
 ## Processing Pipeline
 
 1. **Fetch external odds data**
-   * Pull raw odds from partner APIs and normalize them into a consistent domain model
-     (`OddsSnapshot`, `OddsOutcome`). Include all fields needed to compute fair prices
-     and EV metrics.
+   * Before calling the API, consult the database snapshot metadata for the
+     sport/market pair. Skip the refresh when the most recent `refreshed_at`
+     timestamp is newer than the configured minimum interval (e.g., one minute) so
+     API tokens are conserved.
+   * When a refresh _is_ required, pull raw odds from partner APIs and normalize them
+     into a consistent domain model (`OddsSnapshot`, `OddsOutcome`). Include all
+     fields needed to compute fair prices and EV metrics.
 
 2. **Compute analytics in-memory**
    * Use a dedicated service (e.g., `OddsAnalyticsService`) that, for each matchup and

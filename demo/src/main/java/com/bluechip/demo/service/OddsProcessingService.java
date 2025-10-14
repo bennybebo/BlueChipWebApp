@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -30,15 +31,20 @@ public class OddsProcessingService {
         this.snapshotRepository = snapshotRepository;
     }
 
+    private static final Duration MIN_REFRESH_INTERVAL = Duration.ofMinutes(1);
+
     @Transactional
     public ProcessedOddsResult processAndStore(String sportKey, String marketType) throws IOException {
-        List<Odds> oddsList = oddsService.getOddsData(sportKey, marketType);
+        boolean refreshRequired = isRefreshRequired(sportKey, marketType);
+        List<Odds> oddsList = oddsService.getOddsData(sportKey, marketType, refreshRequired);
         oddsList.sort(Comparator.comparing(Odds::getCommenceTime, Comparator.nullsLast(String::compareTo)));
 
         bestOddsService.computeBestOdds(oddsList);
         Map<String, FairPriceDto> fairMap = fairPriceService.computeFairPrices(marketType, oddsList);
 
-        Instant refreshedAt = Instant.now();
+        Instant refreshedAt = refreshRequired
+                ? Instant.now()
+                : snapshotRepository.findMostRecentRefresh(sportKey, marketType).orElse(Instant.now());
         List<OddsOutcomeSnapshot> snapshots = new ArrayList<>();
 
         for (Odds odds : oddsList) {
@@ -48,17 +54,30 @@ public class OddsProcessingService {
             List<OutcomeSummary> summaries = buildOutcomeSummaries(odds, marketType, fair);
             odds.setOutcomeSummaries(summaries);
 
-            for (OutcomeSummary summary : summaries) {
-                snapshots.add(toSnapshot(odds, summary, sportKey, marketType, refreshedAt));
+            if (refreshRequired) {
+                for (OutcomeSummary summary : summaries) {
+                    snapshots.add(toSnapshot(odds, summary, sportKey, marketType, refreshedAt));
+                }
             }
         }
 
-        snapshotRepository.deleteBySportKeyAndMarketType(sportKey, marketType);
-        if (!snapshots.isEmpty()) {
-            snapshotRepository.saveAll(snapshots);
+        if (refreshRequired) {
+            snapshotRepository.deleteBySportKeyAndMarketType(sportKey, marketType);
+            if (!snapshots.isEmpty()) {
+                snapshotRepository.saveAll(snapshots);
+            }
         }
 
-        return new ProcessedOddsResult(oddsList, fairMap);
+        return new ProcessedOddsResult(oddsList, fairMap, refreshedAt, refreshRequired);
+    }
+
+    private boolean isRefreshRequired(String sportKey, String marketType) {
+        Optional<Instant> lastRefresh = snapshotRepository.findMostRecentRefresh(sportKey, marketType);
+        if (lastRefresh.isEmpty()) {
+            return true;
+        }
+        Instant last = lastRefresh.get();
+        return last.plus(MIN_REFRESH_INTERVAL).isBefore(Instant.now());
     }
 
     private List<OutcomeSummary> buildOutcomeSummaries(Odds odds, String marketType, FairPriceDto fair) {
@@ -143,7 +162,11 @@ public class OddsProcessingService {
         snapshot.setSportKey(sportKey);
         snapshot.setSportTitle(odds.getSportTitle());
         snapshot.setMarketType(marketType);
-        snapshot.setEventId(odds.getId());
+        String eventId = Optional.ofNullable(odds.getId()).orElse(buildMatchupKey(odds));
+        if (eventId != null && eventId.length() > 128) {
+            eventId = eventId.substring(0, 128);
+        }
+        snapshot.setEventId(eventId);
 
         ZonedDateTime commence = odds.getCommenceTimeAsZonedDateTime();
         snapshot.setEventCommence(commence != null ? commence.toInstant() : null);
@@ -170,5 +193,8 @@ public class OddsProcessingService {
         return home + " vs " + away;
     }
 
-    public record ProcessedOddsResult(List<Odds> oddsList, Map<String, FairPriceDto> fairPrices) {}
+    public record ProcessedOddsResult(List<Odds> oddsList,
+                                      Map<String, FairPriceDto> fairPrices,
+                                      Instant refreshedAt,
+                                      boolean refreshed) {}
 }
