@@ -45,7 +45,7 @@ public class OddsProcessingService {
         Instant refreshedAt = refreshRequired
                 ? Instant.now()
                 : snapshotRepository.findMostRecentRefresh(sportKey, marketType).orElse(Instant.now());
-        List<OddsOutcomeSnapshot> snapshots = new ArrayList<>();
+        Map<String, OddsOutcomeSnapshot> snapshotMap = new LinkedHashMap<>();
 
         for (Odds odds : oddsList) {
             String matchupKey = buildMatchupKey(odds);
@@ -56,15 +56,20 @@ public class OddsProcessingService {
 
             if (refreshRequired) {
                 for (OutcomeSummary summary : summaries) {
-                    snapshots.add(toSnapshot(odds, summary, sportKey, marketType, refreshedAt));
+                    OddsOutcomeSnapshot snapshot = toSnapshot(odds, summary, sportKey, marketType, refreshedAt);
+                    String snapshotKey = buildSnapshotKey(snapshot);
+                    OddsOutcomeSnapshot existing = snapshotMap.get(snapshotKey);
+                    if (shouldReplaceSnapshot(snapshot, existing)) {
+                        snapshotMap.put(snapshotKey, snapshot);
+                    }
                 }
             }
         }
 
         if (refreshRequired) {
             snapshotRepository.deleteBySportKeyAndMarketType(sportKey, marketType);
-            if (!snapshots.isEmpty()) {
-                snapshotRepository.saveAll(snapshots);
+            if (!snapshotMap.isEmpty()) {
+                snapshotRepository.saveAll(snapshotMap.values());
             }
         }
 
@@ -185,6 +190,42 @@ public class OddsProcessingService {
         snapshot.setEdge(summary.getEdge());
         snapshot.setRefreshedAt(refreshedAt);
         return snapshot;
+    }
+
+    private String buildSnapshotKey(OddsOutcomeSnapshot snapshot) {
+        return String.join("::",
+                Optional.ofNullable(snapshot.getSportKey()).orElse(""),
+                Optional.ofNullable(snapshot.getMarketType()).orElse(""),
+                Optional.ofNullable(snapshot.getEventId()).orElse(""),
+                Optional.ofNullable(snapshot.getOutcomeKey()).orElse(""));
+    }
+
+    private boolean shouldReplaceSnapshot(OddsOutcomeSnapshot candidate, OddsOutcomeSnapshot existing) {
+        if (candidate == null) {
+            return false;
+        }
+        if (existing == null) {
+            return true;
+        }
+
+        Instant candidateRefresh = candidate.getRefreshedAt();
+        Instant existingRefresh = existing.getRefreshedAt();
+        if (candidateRefresh != null && existingRefresh != null && candidateRefresh.isAfter(existingRefresh)) {
+            return true;
+        }
+        if (candidateRefresh != null && existingRefresh == null) {
+            return true;
+        }
+
+        Double candidateEdge = candidate.getEdge();
+        Double existingEdge = existing.getEdge();
+        if (candidateEdge != null && (existingEdge == null || Double.compare(candidateEdge, existingEdge) > 0)) {
+            return true;
+        }
+
+        Double candidateDecimal = candidate.getBestDecimal();
+        Double existingDecimal = existing.getBestDecimal();
+        return candidateDecimal != null && existingDecimal == null;
     }
 
     private String buildMatchupKey(Odds odds) {
