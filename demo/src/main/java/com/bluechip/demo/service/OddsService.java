@@ -48,7 +48,7 @@ public class OddsService {
         Map.of("key", "icehockey_nhl",       "name", "NHL")
     );
 
-    public List<Odds> getOddsData(String sportKey, String marketType) throws IOException {
+    public List<Odds> getOddsData(String sportKey, String marketType, boolean allowApiRefresh) throws IOException {
         String fileName = "odds_" + sportKey + "_" + marketType + ".json";
         File directory = new File(dataFilePath);
         if (!directory.exists()) {
@@ -56,22 +56,13 @@ public class OddsService {
         }
         File file = new File(directory, fileName);
 
-        // Define data expiration time (e.g., 1 hour)
-        long expirationTime = 60 * 60 * 1000; // 1 hour in milliseconds
+        boolean shouldFetchData = allowApiRefresh || !file.exists();
 
-        boolean shouldFetchData = false;
-
-        if (!file.exists()) {
-            shouldFetchData = true;
-        } else {
-            long lastModified = file.lastModified();
-            long currentTime = System.currentTimeMillis();
-            if (currentTime - lastModified > expirationTime) {
-                shouldFetchData = true;
-            }
+        if (!file.exists() && !allowApiRefresh) {
+            throw new IOException("Cached odds file is missing and API refresh is disabled");
         }
 
-        if (shouldFetchData) {
+        if (shouldFetchData && allowApiRefresh) {
             // Fetch data from API and save it
             String jsonData = oddsApiService.fetchOddsForSportAndMarket(sportKey, marketType);
             oddsApiService.saveResponseToFile(jsonData, file);
