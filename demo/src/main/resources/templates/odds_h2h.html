@@ -138,6 +138,10 @@
                                         <a class="btn btn-outline-light btn-fw"
                                            th:classappend="${marketType} == 'totals' ? ' active'"
                                            th:href="@{'/odds/' + ${sportKey} + '/totals'}">Totals</a>
+
+                                        <a th:href="@{'/odds/' + ${sportKey} + '/' + ${marketType} + '?refresh=true'}"
+                                            class="btn btn-info btn-fw ml-2" id="refreshNowBtn">
+                                            <i class="mdi mdi-refresh"></i> Refresh Now</a>
                                     </div>
 
                                     <!-- Search -->
@@ -294,6 +298,21 @@
                         </div>
                     </div>
                     <!-- panel ends -->
+                </div>
+                <div th:if="${msg}" class="alert alert-success alert-dismissible fade show" role="alert"
+                    style="margin-top:10px;">
+                <span th:text="${msg}">Refreshed!</span>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert"
+                    style="margin-top:10px;">
+                <span th:text="${error}">Refresh failed.</span>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 </div>
             </div>
         </div>

@@ -1,21 +1,16 @@
 package com.bluechip.demo.service;
 
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.bluechip.demo.model.BestOdds;
 import com.bluechip.demo.model.Bookmaker;
 import com.bluechip.demo.model.Market;
 import com.bluechip.demo.model.Odds;
 import com.bluechip.demo.model.Outcome;
+import com.bluechip.demo.util.Utilities;
 
 @Service
 public class BestOddsService {
-
-    @Autowired
-    private OddsService oddsService;
     
     // New method to compute best odds for each Odds object
     public void computeBestOdds(List<Odds> oddsList) {
@@ -72,14 +67,14 @@ public class BestOddsService {
                         for (Outcome outcome : market.getOutcomes()) {
                             // Home Team
                             if (odds.getHomeTeam().equals(outcome.getName())) {
-                                if (oddsService.isBetterSpread(outcome, bestSpreadHomeOutcome, true)) {
+                                if (Utilities.isBetterSpread(outcome, bestSpreadHomeOutcome, true)) {
                                     bestSpreadHomeOutcome = outcome;
                                     bestSpreadHomeBookmaker = bookmaker;
                                 }
                             }
                             // Away Team
                             else if (odds.getAwayTeam().equals(outcome.getName())) {
-                                if (oddsService.isBetterSpread(outcome, bestSpreadAwayOutcome, false)) {
+                                if (Utilities.isBetterSpread(outcome, bestSpreadAwayOutcome, false)) {
                                     bestSpreadAwayOutcome = outcome;
                                     bestSpreadAwayBookmaker = bookmaker;
                                 }
@@ -92,14 +87,14 @@ public class BestOddsService {
                         for (Outcome outcome : market.getOutcomes()) {
                             // Over
                             if ("Over".equalsIgnoreCase(outcome.getName())) {
-                                if (oddsService.isBetterTotalOver(outcome, bestOverOutcome)) {
+                                if (Utilities.isBetterTotalOver(outcome, bestOverOutcome)) {
                                     bestOverOutcome = outcome;
                                     bestOverBookmaker = bookmaker;
                                 }
                             }
                             // Under
                             else if ("Under".equalsIgnoreCase(outcome.getName())) {
-                                if (oddsService.isBetterTotalUnder(outcome, bestUnderOutcome)) {
+                                if (Utilities.isBetterTotalUnder(outcome, bestUnderOutcome)) {
                                     bestUnderOutcome = outcome;
                                     bestUnderBookmaker = bookmaker;
                                 }

@@ -34,7 +34,5 @@ build/
 
 # Ignore application.properties
 src/main/resources/application.properties
-# Ignore the JSON data files
-src/main/resources/data/
 
 .env

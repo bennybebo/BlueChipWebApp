@@ -4,208 +4,247 @@ import com.bluechip.demo.model.Bookmaker;
 import com.bluechip.demo.model.Market;
 import com.bluechip.demo.model.Odds;
 import com.bluechip.demo.model.Outcome;
+import com.bluechip.demo.repositories.OddsRepository;
+import com.bluechip.demo.util.Utilities;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
+import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class OddsService {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+    private final OddsApiService oddsApiService;           // your existing API client
+    private final OddsRepository repo;                     // the repository we just created
 
-    @Autowired
-    private OddsApiService oddsApiService;
+    /**
+     * Fetches a sport/market from the aggregator, loads it into Postgres as a new snapshot,
+     * precomputes GLOBAL BEST per (event, market, line, selection), and promotes the snapshot.
+     * @param sportKey e.g., "americanfootball_nfl"
+     * @param marketTypeUi one of "h2h" | "spreads" | "totals" (your current UI keys)
+     * @return the promoted snapshot_id
+     */
+    @Transactional
+    public long refreshSportSnapshot(String sportKey, String marketTypeUi) throws IOException {
+        // 1) Fetch JSON
+        String json = oddsApiService.fetchOddsForSportAndMarket(sportKey, marketTypeUi);
 
-    @Value("${data.file-path}")
-    private String dataFilePath;
+        // 2) Parse to DTO
+        List<Odds> oddsList = objectMapper.readValue(json, new TypeReference<List<Odds>>() {});
 
-    private static final Map<String, String> SPORT_NAMES = new HashMap<>() {{
-        put("americanfootball_nfl", "NFL");
-        put("basketball_nba", "NBA");
-        put("americanfootball_ncaaf", "NCAAF");
-        put("baseball_mlb", "MLB");
-        put("basketball_wnba", "WNBA");
-        put("icehockey_nhl", "NHL");
-        // Add other sports as needed
-    }};
+        // 3) Snapshot
+        long snapshotId = repo.beginSnapshot(Instant.now());
 
-    private static final List<Map<String, String>> AVAILABLE_SPORTS = List.of(
-        Map.of("key", "americanfootball_nfl", "name", "NFL"),
-        Map.of("key", "basketball_nba",      "name", "NBA"),
-        Map.of("key", "americanfootball_ncaaf","name","NCAAF"),
-        Map.of("key", "baseball_mlb",        "name", "MLB"),
-        Map.of("key", "basketball_wnba",     "name", "WNBA"),
-        Map.of("key", "icehockey_nhl",       "name", "NHL")
-    );
+        // 4) Sportsbooks
+        List<OddsRepository.SportsbookRef> books = extractSportsbooks(oddsList);
+        Map<String, Long> bookIdByKey = repo.upsertSportsbooks(books);
 
-    public List<Odds> getOddsData(String sportKey, String marketType) throws IOException {
-        String fileName = "odds_" + sportKey + "_" + marketType + ".json";
-        File directory = new File(dataFilePath);
-        if (!directory.exists()) {
-            directory.mkdirs(); // Create the directory if it doesn't exist
-        }
-        File file = new File(directory, fileName);
+        // 5) Events
+        List<OddsRepository.EventRow> events = extractEvents(oddsList);
+        repo.upsertEvents(events);
 
-        // Define data expiration time (e.g., 1 hour)
-        long expirationTime = 60 * 60 * 1000; // 1 hour in milliseconds
+        // 6) Prices
+        OddsRepository.MarketType marketType = mapUiMarketToEnum(marketTypeUi);
+        List<OddsRepository.PriceRow> priceRows = buildPriceRows(oddsList, marketTypeUi, marketType, bookIdByKey);
+        repo.insertPriceBatch(snapshotId, priceRows);
 
-        boolean shouldFetchData = false;
+        // 7) Best rows (from market board)
+        List<OddsRepository.DerivedRow> bestRows = buildDerivedBestRows(priceRows);
 
-        if (!file.exists()) {
-            shouldFetchData = true;
-        } else {
-            long lastModified = file.lastModified();
-            long currentTime = System.currentTimeMillis();
-            if (currentTime - lastModified > expirationTime) {
-                shouldFetchData = true;
-            }
-        }
+        // TODO: HANDLE FAIR PRICES. Possibly in buildDerivedBestRows or a new method?
 
-        if (shouldFetchData) {
-            // Fetch data from API and save it
-            String jsonData = oddsApiService.fetchOddsForSportAndMarket(sportKey, marketType);
-            oddsApiService.saveResponseToFile(jsonData, file);
-        }
+        // 10) Persist derived
+        repo.insertDerivedBatch(snapshotId, bestRows);
 
-        // Read data from the JSON file
-        return objectMapper.readValue(file, new TypeReference<List<Odds>>() {});
+        // 11) Promote
+        repo.promoteSnapshot(snapshotId);
+
+        return snapshotId;
     }
 
-    // Helper method to get unique bookmakers offering the specified market type
-    public Set<Bookmaker> getUniqueBookmakers(List<Odds> oddsList, String marketType) {
-        Map<String, Bookmaker> uniqueBookmakersMap = new HashMap<>();
+    private List<OddsRepository.SportsbookRef> extractSportsbooks(List<Odds> oddsList) {
+        Map<String, OddsRepository.SportsbookRef> uniq = new HashMap<>();
+        for (Odds o : oddsList) {
+            if (o.getBookmakers() == null) continue;
+            for (Bookmaker b : o.getBookmakers()) {
+                if (b.getKey() == null) continue;
+                String key = b.getKey();
+                String title = b.getTitle() != null ? b.getTitle() : key;
+                String logoSlug = toLogoSlug(title);
+                uniq.putIfAbsent(key, new OddsRepository.SportsbookRef(key, title, logoSlug));
+            }
+        }
+        return new ArrayList<>(uniq.values());
+    }
 
-        for (Odds odds : oddsList) {
-            for (Bookmaker bookmaker : odds.getBookmakers()) {
-                // Check if the bookmaker offers the specified market type
-                boolean offersMarket = false;
-                for (Market market : bookmaker.getMarkets()) {
-                    if (market.getKey().equals(marketType)) {
-                        offersMarket = true;
-                        break;  // No need to check further markets once found
+    private List<OddsRepository.EventRow> extractEvents(List<Odds> oddsList) {
+        return oddsList.stream().map(o ->
+                new OddsRepository.EventRow(
+                        o.getId(),
+                        o.getSportKey(),
+                        o.getSportTitle(),
+                        o.getCommenceTime(), // assuming Instant (or convert)
+                        o.getHomeTeam(),
+                        o.getAwayTeam()
+                )
+        ).toList();
+    }
+
+    private List<OddsRepository.PriceRow> buildPriceRows(
+            List<Odds> oddsList,
+            String marketTypeUi,
+            OddsRepository.MarketType marketType,
+            Map<String, Long> bookIdByKey
+    ) {
+        List<OddsRepository.PriceRow> rows = new ArrayList<>();
+
+        for (Odds o : oddsList) {
+            String eventId = o.getId();
+            String home = o.getHomeTeam();
+            String away = o.getAwayTeam();
+
+            if (o.getBookmakers() == null) continue;
+            for (Bookmaker b : o.getBookmakers()) {
+                Long sbId = bookIdByKey.get(b.getKey());
+                if (sbId == null) continue;
+
+                Instant lastUpdateBook = b.getLastUpdate();
+
+                if (b.getMarkets() == null) continue;
+                for (Market m : b.getMarkets()) {
+                    if (!marketTypeUi.equalsIgnoreCase(m.getKey())) continue;
+
+                    Instant lastUpdate = m.getLastUpdate() != null ? m.getLastUpdate() : lastUpdateBook;
+
+                    if (m.getOutcomes() == null) continue;
+                    for (Outcome out : m.getOutcomes()) {
+                        Mapping mapped = mapOutcomeToSchema(marketType, out, home, away);
+                        if (mapped == null) continue;
+
+                        BigDecimal dec = Utilities.americanToDecimal(out.getPrice());
+                        rows.add(new OddsRepository.PriceRow(
+                                eventId,
+                                marketType,
+                                mapped.lineValueNullable,
+                                mapped.selection,
+                                sbId,
+                                out.getPrice(),                // american
+                                dec,                           // decimal
+                                lastUpdate,
+                                null                           // raw_json (optional)
+                        ));
                     }
                 }
-
-                if (offersMarket) {
-                    uniqueBookmakersMap.putIfAbsent(bookmaker.getTitle(), bookmaker);
-                }
             }
         }
-        return new HashSet<>(uniqueBookmakersMap.values());
+
+        return rows;
     }
 
-    // Helper method to map matchups and bookmakers by market type
-    public Map<String, Map<String, Bookmaker>> getMatchupBookmakerMap(List<Odds> oddsList, String marketType) {
-        Map<String, Map<String, Bookmaker>> matchupBookmakerMap = new HashMap<>();
+    /** Reduce all price rows to GLOBAL best per (event, market, line, selection). */
+    private List<OddsRepository.DerivedRow> buildDerivedBestRows(List<OddsRepository.PriceRow> priceRows) {
+        record Key(String event, OddsRepository.MarketType mt, BigDecimal line, OddsRepository.SelectionKey sel) {}
 
-        for (Odds odds : oddsList) {
-            String matchupKey = odds.getHomeTeam() + " vs " + odds.getAwayTeam();
-
-            // Get or create the bookmakers map for this matchup
-            Map<String, Bookmaker> bookmakersForMatchup = matchupBookmakerMap.get(matchupKey);
-            if (bookmakersForMatchup == null) {
-                bookmakersForMatchup = new HashMap<>();
-                matchupBookmakerMap.put(matchupKey, bookmakersForMatchup);
-            }
-
-            for (Bookmaker bookmaker : odds.getBookmakers()) {
-                // Check if the bookmaker offers the specified market type
-                boolean offersMarket = false;
-                for (Market market : bookmaker.getMarkets()) {
-                    if (market.getKey().equals(marketType)) {
-                        offersMarket = true;
-                        break;  // No need to check further markets once found
-                    }
-                }
-
-                if (offersMarket) {
-                    bookmakersForMatchup.putIfAbsent(bookmaker.getTitle(), bookmaker);
-                }
+        Map<Key, OddsRepository.PriceRow> best = new HashMap<>();
+        for (OddsRepository.PriceRow r : priceRows) {
+            Key k = new Key(r.eventId(), r.marketType(), r.lineValueNullable(), r.selection());
+            OddsRepository.PriceRow current = best.get(k);
+            if (current == null || r.decimalOdds().compareTo(current.decimalOdds()) > 0) {
+                best.put(k, r);
             }
         }
-        return matchupBookmakerMap;
-    }
 
-    // Helper method to map sport keys to user-friendly names
-    public String getSportName(String sportKey) {
-        return SPORT_NAMES.getOrDefault(sportKey, sportKey);
-    }
-
-    // Helper method to get a list of available sports
-    // TODO: Investigate why this needs to be a list of maps instead of a single map
-    public List<Map<String, String>> getAvailableSports() {
-        return AVAILABLE_SPORTS;
-    }
-
-    // Helper method to determine if a new spread is better than the current best
-    public boolean isBetterSpread(Outcome newOutcome, Outcome currentBest, boolean isHomeTeam) {
-        if (newOutcome == null) return false;
-        if (currentBest == null) return true;
-
-        Double newPoint = newOutcome.getPoint();
-        Double currentPoint = currentBest.getPoint();
-
-        // For Home Team: Usually the favorite (negative spread)
-        if (isHomeTeam) {
-            // For favorites (negative spread), smaller negative number (closer to zero) is better
-            if (newPoint < 0 && currentPoint < 0) {
-                if (newPoint > currentPoint) return true;
-                if (newPoint.equals(currentPoint) && newOutcome.getPrice() > currentBest.getPrice()) return true;
-            }
-            // If one is negative and the other is positive, choose the positive (better for bettor)
-            else if (newPoint >= 0 && currentPoint < 0) {
-                return true;
-            }
-            else if (newPoint >= 0 && currentPoint >= 0) {
-                if (newPoint > currentPoint) return true;
-                if (newPoint.equals(currentPoint) && newOutcome.getPrice() > currentBest.getPrice()) return true;
-            }
-        } else {
-            // For Away Team: Usually the underdog (positive spread)
-            // Larger positive number is better
-            if (newPoint > currentPoint) return true;
-            if (newPoint.equals(currentPoint) && newOutcome.getPrice() > currentBest.getPrice()) return true;
+        List<OddsRepository.DerivedRow> rows = new ArrayList<>(best.size());
+        for (Map.Entry<Key, OddsRepository.PriceRow> e : best.entrySet()) {
+            Key k = e.getKey();
+            OddsRepository.PriceRow r = e.getValue();
+            rows.add(new OddsRepository.DerivedRow(
+                    k.event,
+                    k.mt,
+                    k.line,
+                    k.sel,
+                    r.decimalOdds(),          // best_decimal
+                    r.americanOddsNullable(), // best_american
+                    r.sportsbookId(),         // best_sportsbook_id
+                    // TODO: fair prices and ev% to be filled later
+                    null,                     // fair_decimal (precompute later)
+                    null,                     // fair_american
+                    null,                     // fair_prob
+                    null                      // ev_percent_best
+            ));
         }
-        return false;
+        return rows;
     }
 
-    // Helper method to determine if a new Over total is better than the current best
-    public boolean isBetterTotalOver(Outcome newOutcome, Outcome currentBest) {
-        if (newOutcome == null) return false;
-        if (currentBest == null) return true;
+    
+    private OddsRepository.MarketType mapUiMarketToEnum(String ui) {
+        if (ui == null) throw new IllegalArgumentException("marketTypeUi is null");
 
-        Double newPoint = newOutcome.getPoint();
-        Double currentPoint = currentBest.getPoint();
-
-        // Lower total is better for Over bets
-        if (newPoint < currentPoint) return true;
-        if (newPoint.equals(currentPoint) && newOutcome.getPrice() > currentBest.getPrice()) return true;
-
-        return false;
+        return switch (ui.toLowerCase()) {
+            case "h2h" -> OddsRepository.MarketType.h2h;
+            case "spreads" -> OddsRepository.MarketType.spreads;
+            case "totals" -> OddsRepository.MarketType.totals;
+            default -> throw new IllegalArgumentException("Unknown market type UI: " + ui);
+        };
     }
 
-    // Helper method to determine if a new Under total is better than the current best
-    public boolean isBetterTotalUnder(Outcome newOutcome, Outcome currentBest) {
-        if (newOutcome == null) return false;
-        if (currentBest == null) return true;
+    /** Maps one API outcome into our (selection_key, line_value) for a given market type. */
+    private Mapping mapOutcomeToSchema(OddsRepository.MarketType marketType, Outcome out, String homeTeam, String awayTeam) {
+        if (out == null) return null;
 
-        Double newPoint = newOutcome.getPoint();
-        Double currentPoint = currentBest.getPoint();
-
-        // Higher total is better for Under bets
-        if (newPoint > currentPoint) return true;
-        if (newPoint.equals(currentPoint) && newOutcome.getPrice() > currentBest.getPrice()) return true;
-
-        return false;
+        switch (marketType) {
+            case h2h -> {
+                String n = safe(out.getName());
+                if (n.equalsIgnoreCase(safe(homeTeam))) {
+                    return new Mapping(OddsRepository.SelectionKey.home, null);
+                } else if (n.equalsIgnoreCase(safe(awayTeam))) {
+                    return new Mapping(OddsRepository.SelectionKey.away, null);
+                } else if (n.equalsIgnoreCase("draw")) {
+                    return new Mapping(OddsRepository.SelectionKey.draw, null);
+                }
+                return null; // unknown label
+            }
+            case totals -> {
+                String n = safe(out.getName());
+                if (n.equalsIgnoreCase("over")) {
+                    return new Mapping(OddsRepository.SelectionKey.over, toBig(out.getPoint()));
+                } else if (n.equalsIgnoreCase("under")) {
+                    return new Mapping(OddsRepository.SelectionKey.under, toBig(out.getPoint()));
+                }
+                return null;
+            }
+            case spreads -> {
+                String n = safe(out.getName());
+                if (n.equalsIgnoreCase(safe(homeTeam))) {
+                    return new Mapping(OddsRepository.SelectionKey.home, toBig(out.getPoint()));
+                } else if (n.equalsIgnoreCase(safe(awayTeam))) {
+                    return new Mapping(OddsRepository.SelectionKey.away, toBig(out.getPoint()));
+                }
+                return null;
+            }
+        }
+        return null;
     }
+
+    private String toLogoSlug(String title) {
+        if (title == null) return null;
+        return title.replaceAll("[^A-Za-z0-9]", "");
+    }
+
+    private String safe(String s) { return s == null ? "" : s; }
+    private BigDecimal toBig(Double d) { return d == null ? null : BigDecimal.valueOf(d).setScale(3, RoundingMode.HALF_UP); }
+
+    /* small holder for mapping result */
+    private record Mapping(OddsRepository.SelectionKey selection, BigDecimal lineValueNullable) {}
 }

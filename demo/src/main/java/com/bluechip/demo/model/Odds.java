@@ -1,11 +1,10 @@
 package com.bluechip.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import lombok.Setter;
 import lombok.Getter;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import lombok.Setter;
+
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -14,46 +13,36 @@ import java.util.List;
 public class Odds {
     private String id;
 
-    @JsonProperty("sport_key")  // Map "sport_key" to the Java field "sportKey" e.g.(americanfootball_nfl)
+    @JsonProperty("sport_key")
     private String sportKey;
 
-    @JsonProperty("sport_title")  // Map "sport_title" to the Java field "sportTitle"
+    @JsonProperty("sport_title")
     private String sportTitle;
 
-    @JsonProperty("commence_time")  // Map "commence_time" to the Java field "commenceTime"
-    private String commenceTime;
+    @JsonProperty("commence_time")
+    private Instant commenceTime;
 
-    @JsonProperty("home_team")  // Map "home_team" to the Java field "homeTeam"
+    @JsonProperty("home_team")
     private String homeTeam;
 
-    @JsonProperty("away_team")  // Map "away_team" to the Java field "awayTeam"
+    @JsonProperty("away_team")
     private String awayTeam;
 
     private List<Bookmaker> bookmakers;
-    
+
     private BestOdds bestOdds;
 
-    // Method to parse commenceTime string into ZonedDateTime
+    // ---- Convenience formatting for your templates ----
+    private static final ZoneId UI_ZONE = ZoneId.of("America/New_York");
+    private static final DateTimeFormatter UI_FMT = DateTimeFormatter.ofPattern("M/d - h:mm a");
+
     public ZonedDateTime getCommenceTimeAsZonedDateTime() {
-        try {
-            // Assuming commenceTime is in ISO 8601 format (e.g., "2024-09-22T17:01:00Z")
-            ZonedDateTime zonedDateTime = ZonedDateTime.parse(commenceTime);
-            // Convert the time to Eastern Standard Time (EST)
-            return zonedDateTime.withZoneSameInstant(ZoneId.of("America/New_York"));
-        } catch (Exception e) {
-            // Handle parsing error, return null or log error
-            return null;
-        }
+        return commenceTime == null ? null : commenceTime.atZone(ZoneId.of("UTC")).withZoneSameInstant(UI_ZONE);
     }
 
-    // Method to return formatted commenceTime for display
     public String getFormattedCommenceTime() {
-        ZonedDateTime zonedDateTime = getCommenceTimeAsZonedDateTime();
-        if (zonedDateTime != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d - h:mm a");
-            return zonedDateTime.format(formatter);
-        }
-        return "";
+        ZonedDateTime zdt = getCommenceTimeAsZonedDateTime();
+        return zdt == null ? "" : zdt.format(UI_FMT);
     }
-
 }
+

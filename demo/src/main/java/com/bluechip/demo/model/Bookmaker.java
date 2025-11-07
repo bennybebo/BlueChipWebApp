@@ -1,46 +1,22 @@
 package com.bluechip.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.Instant;
 import java.util.List;
 
+@Getter
+@Setter
 public class Bookmaker {
-    private String key; // e.g (draftkings)
-    private String title; // e.g. (DraftKings)
-    
+    private String key;    // e.g. "draftkings"
+    private String title;  // e.g. "DraftKings"
+
     @JsonProperty("last_update")
-    private String lastUpdate;
+    private Instant lastUpdate;
+
     private List<Market> markets;
 
-    // Getters and Setters
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(String lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
-    public List<Market> getMarkets() {
-        return markets;
-    }
-
-    public void setMarkets(List<Market> markets) {
-        this.markets = markets;
-    }
 }
