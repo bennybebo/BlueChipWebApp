@@ -14,6 +14,8 @@
 
 - Store user's selected sports books
 
+-ClickHouse (or BigQuery/Snowflake if you prefer managed cloud OLAP) for historical analyzing
+
 Long term TODOs:
 - Player props
 - Arbitrage page

@@ -1,9 +1,9 @@
-package com.bluechip.demo.dto;
+package com.bluechip.demo.model;
 
 import lombok.*;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class FairPriceDto {
+public class FairPrices {
     private double homeProb;      // 0..1
     private double awayProb;      // 0..1
     private double homeDecimal;   // 1/p

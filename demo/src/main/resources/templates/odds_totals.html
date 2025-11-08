@@ -196,6 +196,10 @@
 					                    <a class="btn btn-outline-light btn-fw" 
 					                       th:classappend="${marketType} == 'totals' ? ' active'" 
 					                       th:href="@{'/odds/' + ${sportKey} + '/totals'}">Totals</a>
+                                           
+                                        <a th:href="@{'/odds/' + ${sportKey} + '/' + ${marketType} + '?refresh=true'}"
+                                            class="btn btn-info btn-fw ml-2" id="refreshNowBtn">
+                                            <i class="mdi mdi-refresh"></i> Refresh Now</a>
 					                </div>
 					                
 					                <!-- Search and Reload Button -->

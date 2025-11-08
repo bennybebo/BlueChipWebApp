@@ -206,22 +206,21 @@
                                             </td>
 
                                             <!-- NEW: Fair Price (No Vig) Cell -->
-                                            <td class="fair-price-cell"
-                                                th:with="fair=${fairMap != null ? fairMap[odds.homeTeam + ' vs ' + odds.awayTeam] : null}">
+                                            <td class="fair-price-cell">
                                                 <!-- Premium users (isPremium=true) see actual values if present -->
                                                 <div th:if="${isPremium}">
                                                     <div class="fair-line">
                                                         <strong th:text="${odds.homeTeam}">Home</strong>:
-                                                        <span th:text="${fair != null ? (fair.homeAmerican > 0 ? '+' + fair.homeAmerican : fair.homeAmerican) : '—'}">+112</span>
+                                                        <span th:text="${odds.fairPrices != null ? (odds.fairPrices.homeAmerican > 0 ? '+' + odds.fairPrices.homeAmerican : odds.fairPrices.homeAmerican) : '—'}">+112</span>
                                                         <span class="fair-dec">
-                                                            (dec <span th:text="${fair != null ? #numbers.formatDecimal(fair.homeDecimal,1,'COMMA',2,'POINT') : '—'}">2.12</span>)
+                                                            (dec <span th:text="${odds.fairPrices != null ? #numbers.formatDecimal(odds.fairPrices.homeDecimal,1,'COMMA',2,'POINT') : '—'}">2.12</span>)
                                                         </span>
                                                     </div>
                                                     <div class="fair-line">
                                                         <strong th:text="${odds.awayTeam}">Away</strong>:
-                                                        <span th:text="${fair != null ? (fair.awayAmerican > 0 ? '+' + fair.awayAmerican : fair.awayAmerican) : '—'}">-105</span>
+                                                        <span th:text="${odds.fairPrices != null ? (odds.fairPrices.awayAmerican > 0 ? '+' + odds.fairPrices.awayAmerican : odds.fairPrices.awayAmerican) : '—'}">-105</span>
                                                         <span class="fair-dec">
-                                                            (dec <span th:text="${fair != null ? #numbers.formatDecimal(fair.awayDecimal,1,'COMMA',2,'POINT') : '—'}">1.95</span>)
+                                                            (dec <span th:text="${odds.fairPrices != null ? #numbers.formatDecimal(odds.fairPrices.awayDecimal,1,'COMMA',2,'POINT') : '—'}">1.95</span>)
                                                         </span>
                                                     </div>
                                                 </div>

@@ -32,6 +32,8 @@ public class Odds {
 
     private BestOdds bestOdds;
 
+    private FairPrices fairPrices;
+
     // ---- Convenience formatting for your templates ----
     private static final ZoneId UI_ZONE = ZoneId.of("America/New_York");
     private static final DateTimeFormatter UI_FMT = DateTimeFormatter.ofPattern("M/d - h:mm a");

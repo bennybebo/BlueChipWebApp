@@ -1,7 +1,7 @@
 package com.bluechip.demo.service;
 
-import com.bluechip.demo.dto.FairPriceDto;
 import com.bluechip.demo.model.Bookmaker;
+import com.bluechip.demo.model.FairPrices;
 import com.bluechip.demo.model.Market;
 import com.bluechip.demo.model.Odds;
 import com.bluechip.demo.model.Outcome;
@@ -31,13 +31,12 @@ public class FairPriceService {
      * Computes fair prices for the given marketType across a list of Odds.
      * Currently implemented for "h2h". (Spreads/Totals can be added similarly.)
      */
-    public Map<String, FairPriceDto> computeFairPrices(String marketType, List<Odds> oddsList) {
-        Map<String, FairPriceDto> fairMap = new HashMap<>();
-        if (oddsList == null || oddsList.isEmpty()) return fairMap;
+    public void computeFairPrice(List<Odds> oddsList, String marketType) {
+        if (oddsList == null || oddsList.isEmpty()) return;
 
         if (!"h2h".equalsIgnoreCase(marketType)) {
             // Future: implement spreads/totals with similar per-book pairing & de-vig.
-            return fairMap;
+            return;
         }
 
         for (Odds odds : oddsList) {
@@ -87,22 +86,15 @@ public class FairPriceService {
                 homeProbs.add(pH);
             }
 
-            FairPriceDto fair = fairFromHomeProbsEqualWeightedTrimmed(homeProbs);
-            if (fair != null) {
-                String key = (odds.getHomeTeam() != null ? odds.getHomeTeam() : "Home")
-                           + " vs "
-                           + (odds.getAwayTeam() != null ? odds.getAwayTeam() : "Away");
-                fairMap.put(key, fair);
-            }
+            odds.setFairPrices(fairFromHomeProbsEqualWeightedTrimmed(homeProbs));
         }
-        return fairMap;
     }
 
     /**
      * Core aggregator: equal-weight, robustly trimmed average in logit space.
      * Input: list of per-book HOME probabilities after de-vig.
      */
-    private FairPriceDto fairFromHomeProbsEqualWeightedTrimmed(List<Double> pHomeList) {
+    private FairPrices fairFromHomeProbsEqualWeightedTrimmed(List<Double> pHomeList) {
         if (pHomeList == null || pHomeList.isEmpty()) return null;
 
         // Convert to logits
@@ -132,7 +124,7 @@ public class FairPriceService {
         double dHfair = 1.0 / pH;
         double dAfair = 1.0 / pA;
 
-        return new FairPriceDto(
+        return new FairPrices(
                 pH, pA,
                 r2(dHfair), r2(dAfair),
                 decimalToAmerican(dHfair),

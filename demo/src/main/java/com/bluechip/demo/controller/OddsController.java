@@ -1,6 +1,5 @@
 package com.bluechip.demo.controller;
 
-import com.bluechip.demo.dto.FairPriceDto;
 import com.bluechip.demo.model.*;
 import com.bluechip.demo.repositories.UserRepository;
 import com.bluechip.demo.service.BestOddsService;
@@ -31,6 +30,7 @@ public class OddsController {
 
     @Autowired private OddsService oddsService;
     @Autowired private BestOddsService bestOddsService;
+    @Autowired private FairPriceService fairPriceService;
     @Autowired private JdbcTemplate jdbc;
 
     private final UserRepository userRepository;
@@ -39,7 +39,7 @@ public class OddsController {
     @GetMapping("/{sport}/{market}")
     public String getOdds(
             @PathVariable("sport") String sportKey,
-            @PathVariable("market") String marketTypeUi,
+            @PathVariable("market") String marketType,
             @AuthenticationPrincipal UserDetails principal,
             @RequestParam(defaultValue = "false") boolean refresh, // <-- manual trigger
             Model model,
@@ -49,15 +49,18 @@ public class OddsController {
 
         try {
             if (refresh) {
-                oddsService.refreshSportSnapshot(sportKey, marketTypeUi);
+                oddsService.refreshSportSnapshot(sportKey, marketType);
             }
 
             // 1) Read latest snapshot events for this sport+market
-            List<Odds> oddsList = fetchOddsFromDb(sportKey, marketTypeUi);
+            List<Odds> oddsList = fetchOddsFromDb(sportKey, marketType);
             oddsList.sort(Comparator.comparing(Odds::getCommenceTime));
 
             // 2) Compute best odds for UI
             bestOddsService.computeBestOdds(oddsList);
+
+            // Compute fair prices per event
+            fairPriceService.computeFairPrice(oddsList, marketType);
 
             // 3) Collect unique bookmakers
             Set<Bookmaker> uniqueBookmakers = oddsList.stream()
@@ -69,14 +72,10 @@ public class OddsController {
 
             // 4) Build matchup-to-bookmaker map for the view
             Map<String, Map<String, Bookmaker>> matchupBookmakerMap =
-                    buildMatchupBookmakerMap(oddsList, marketTypeUi);
+                    buildMatchupBookmakerMap(oddsList, marketType);
 
             // 5) Load sport name and available sports
             String sportName = Utilities.getSportName(sportKey);
-
-            // TODO: Create fairPrices class, add it to Odds, compute using FairPriceService
-            // 6) Fair prices (if computed)
-            Map<String, FairPriceDto> fairMap = buildFairMapFromDb(sportKey, marketTypeUi);
 
             // 7) Determine user role
             boolean isPremium = false;
@@ -90,10 +89,9 @@ public class OddsController {
             model.addAttribute("uniqueBookmakers", uniqueBookmakers);
             model.addAttribute("matchupBookmakerMap", matchupBookmakerMap);
             model.addAttribute("sportKey", sportKey);
-            model.addAttribute("marketType", marketTypeUi);
+            model.addAttribute("marketType", marketType);
             model.addAttribute("sportName", sportName);
             model.addAttribute("availableSports", Utilities.AVAILABLE_SPORTS);
-            model.addAttribute("fairMap", fairMap);
             model.addAttribute("isPremium", isPremium);
             model.addAttribute("refreshMode", refresh); // optional flag for UI feedback
 
@@ -102,7 +100,7 @@ public class OddsController {
             model.addAttribute("error", "Unable to load odds data.");
         }
 
-        return "odds_" + marketTypeUi;
+        return "odds_" + marketType;
     }
 
 
@@ -252,43 +250,6 @@ public class OddsController {
         return map;
     }
 
-    private Map<String, FairPriceDto> buildFairMapFromDb(String sportKey, String marketType) {
-        if (!"h2h".equalsIgnoreCase(marketType)) return Collections.emptyMap();
-
-        List<FairRow> rows = jdbc.query("""
-            SELECT d.event_id, e.home_team, e.away_team,
-                   d.selection_key::text AS selection_key,
-                   d.fair_american_odds,
-                   d.fair_decimal_odds
-            FROM v_derived_latest d
-            JOIN event e ON e.event_id = d.event_id
-            WHERE e.sport_key = ?
-              AND d.market_type = 'h2h'::market_type_enum
-              AND d.line_value IS NULL
-        """, new Object[]{ sportKey }, (rs, i) -> new FairRow(
-                rs.getString("event_id"),
-                rs.getString("home_team"),
-                rs.getString("away_team"),
-                rs.getString("selection_key"),
-                (Integer) rs.getObject("fair_american_odds"),
-                (BigDecimal) rs.getObject("fair_decimal_odds")
-        ));
-
-        Map<String, FairPriceDto> fairMap = new LinkedHashMap<>();
-        for (FairRow r : rows) {
-            String key = r.homeTeam + " vs " + r.awayTeam;
-            FairPriceDto dto = fairMap.computeIfAbsent(key, k -> new FairPriceDto());
-            if ("home".equals(r.selectionKey)) {
-                dto.setHomeAmerican(r.fairAmerican);
-                if (r.fairDecimal != null) dto.setHomeDecimal(r.fairDecimal.doubleValue());
-            } else if ("away".equals(r.selectionKey)) {
-                dto.setAwayAmerican(r.fairAmerican);
-                if (r.fairDecimal != null) dto.setAwayDecimal(r.fairDecimal.doubleValue());
-            }
-        }
-        return fairMap;
-    }
-
     /* ============================
        Row mappers / simple beans
        ============================ */
@@ -346,25 +307,6 @@ public class OddsController {
         public BigDecimal getDecimalOdds() { return decimalOdds; }
         public String getSbKey() { return sbKey; }
         public String getSbTitle() { return sbTitle; }
-    }
-
-    private static class FairRow {
-        private final String eventId;
-        private final String homeTeam;
-        private final String awayTeam;
-        private final String selectionKey;
-        private final Integer fairAmerican;
-        private final BigDecimal fairDecimal;
-
-        public FairRow(String eventId, String homeTeam, String awayTeam, String selectionKey,
-                       Integer fairAmerican, BigDecimal fairDecimal) {
-            this.eventId = eventId;
-            this.homeTeam = homeTeam;
-            this.awayTeam = awayTeam;
-            this.selectionKey = selectionKey;
-            this.fairAmerican = fairAmerican;
-            this.fairDecimal = fairDecimal;
-        }
     }
 
     private static Double toDouble(BigDecimal v) { return v == null ? null : v.doubleValue(); }
